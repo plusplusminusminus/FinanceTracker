@@ -1,14 +1,29 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox, filedialog
 
 class MainWindow:
-    def __init__(self, on_login):
+    def __init__(self, on_login, on_csv_upload):
         # Create the main window
         self.window = tk.Tk()
         self.window.title("FinanceTracker Login")
         self.window.geometry("200x200")
         self.on_login = on_login
+        self.on_csv_upload = on_csv_upload
+    # if self.on_csv_upload():
+    #     #messagebox.showinfo(title="Login Success", message="You successfully logged in.")
+    # else:
+    #     #messagebox.showerror(title="Error", message="Invalid login.")
+
+        # Upload CSV function
+        def upload():
+            file_path = filedialog.askopenfilename(
+                title="Select CSV File",
+                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+            )
+            self.on_csv_upload(file_path)
+        # Upload CSV
+        self.upload_csv = ttk.Button(self.window, text="Uploading the CSV", command=upload)
+        self.upload_csv.pack(pady=10)
 
         # Title label
         title_label = ttk.Label(self.window, text="Login", font=("Arial", 16))

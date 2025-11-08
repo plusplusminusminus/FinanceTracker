@@ -14,6 +14,15 @@ class Database:
                     )
                 ''')
 
+        # Create the transactions table
+        self.cursor.execute('''
+                   CREATE TABLE IF NOT EXISTS transactions (
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       TransactionDate DATE NOT NULL,
+                       amount FLOAT NOT NULL
+                   )
+               ''')
+
         # Insert a sample user for testing
         self.cursor.execute("""
             INSERT INTO users (username, password) 
@@ -29,6 +38,9 @@ class Database:
         """, (username, password))
 
         return self.cursor.fetchall()
+
+    def insert_transactions_into_db(self, df):
+        df.to_sql("transactions", self.conn, if_exists="append", index=False)
 
     def close(self):
         self.conn.close()
