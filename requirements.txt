@@ -1,0 +1,7 @@
+sqlalchemy==2.0.23
+passlib==1.7.4
+bcrypt==4.1.1
+matplotlib==3.8.2
+pytest==7.4.3
+flake8==6.1.0
+
