@@ -1,5 +1,4 @@
-
-from database.db_config import Base, engine, Session
+from database.db_config import Base, engine, SessionLocal
 from database.models.user_model import User
 from database.models.category_model import Category
 from database.models.goal_model import Goal
@@ -8,7 +7,7 @@ from database.models.transaction_model import Transaction
 __all__ = [
     'Base',
     'engine', 
-    'Session',
+    'SessionLocal',
     'User',
     'Category',
     'Goal',
@@ -21,7 +20,7 @@ def initialize_database():
     Base.metadata.create_all(bind=engine)
 
     from database.crud.category_crud import initialize_categories
-    db = Session()
+    db = SessionLocal()
     try:
         initialize_categories(db)
         print("Database initialized successfully")
