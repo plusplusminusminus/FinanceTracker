@@ -7,7 +7,7 @@ Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()
 
-user_crud_using_hashlib.create_user(db, "alex@example.com", "alex", "12345", date(1990, 1, 1))
+user_crud_using_hashlib.create_user(db, "alex", "alex@example.com", "12345", date(1990, 1, 1))
 
 hashed_password = user_crud_using_hashlib.hash_password("12345")
 
