@@ -1,24 +1,22 @@
 from sqlalchemy.orm import Session
 from database.models.user_model import User
 from datetime import date
-from passlib.context import CryptContext
-
-# import hashlib
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 class UserCrud:
     def __init__(self, db: Session):
         self._db = db
 
     """Hash the password that the user enters"""
-    def hash_password(self, plain_text: str) -> bytes:
-        # return hashlib.sha256(plain_text.encode()).hexdigest()
-        return pwd_context.hash(plain_text)
+    def hash_password(self, plain_text: str) -> str:
+        #generate a salt and hash the password 
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(plain_text.encode('utf-8'), salt)
+        return hashed.decode('utf-8')
 
     """Verify the password that hte user enter with the hashed password"""
     def verify_password(self, plain_password, hashed_password) -> bool:
-        # return self.hash_password(plain_password) == hashed_password
-        return pwd_context.verify(plain_password, hashed_password)
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
     """Create a new user with the hashed password"""
     def create_user(self, username: str, email: str, password: str, birthdate: date = None) -> User:
