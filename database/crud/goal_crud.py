@@ -1,23 +1,30 @@
 from sqlalchemy.orm import Session
 from database.models.goal_model import Goal
-
+from datetime import date, datetime
 class GoalCrud:
     def __init__(self, db: Session):
         self._db = db
 
     """Create a new goal for the user"""
-    def create_goal(self, user_id: int, goal_description: str, goal_amount: float, current_amount: float = 0.0) -> Goal:
+    def create_goal(self, user_id: int, goal_description: str, goal_amount: float, current_amount: float = 0.0, start_date: date = None, end_date: date = None) -> Goal:
         goal = Goal(
             user_id = user_id,
             description = goal_description,
             target_amount = goal_amount,
             current_amount = current_amount,
-            status = "current"
+            status = "current",
+            start_date = start_date,
+            end_date = end_date
         )
         self._db.add(goal)
         self._db.commit()
         self._db.refresh(goal)
         return goal
+    def _auto_complete_goal(self, goal: Goal) -> None:
+        if goal and goal.end_date and datetime.date() >= goal.end_date and goal.status != "completed":
+            goal.status = "completed"
+            self._db.commit()
+            self._db.refresh(goal)
 
     """get the goal based on its ID for the user"""
     def get_goal_by_id(self, goal_id: int, user_id: int) -> Goal:
@@ -25,15 +32,24 @@ class GoalCrud:
 
     """Get all the goals for the user"""
     def get_goals_by_user(self, user_id: int) -> list[Goal]:
-        return self._db.query(Goal).filter(Goal.user_id == user_id).all()
+        goals = self._db.query(Goal).filter(Goal.user_id == user_id).all()
+        for goal in goals:
+            self._auto_complete_goal(goal)
+        return goals
 
     """Get all the current goals for the user"""
     def get_current_goals_by_user(self, user_id: int) -> list[Goal]:
-        return self._db.query(Goal).filter(Goal.user_id == user_id, Goal.status == 'current').all()
+        goals = self._db.query(Goal).filter(Goal.user_id == user_id, Goal.status == 'current').all()
+        for goal in goals:
+            self._auto_complete_goal(goal)
+        return goals
 
-    """Get all the completed goals for the user"""
+    """Get all the completed goals for the user""" 
     def get_completed_goals_by_user(self, user_id: int) -> list[Goal]:
-        return self._db.query(Goal).filter(Goal.user_id == user_id, Goal.status == 'completed').all()
+        goals = self._db.query(Goal).filter(Goal.user_id == user_id, Goal.status == 'completed').all()
+        for goal in goals:
+            self._auto_complete_goal(goal)
+        return goals
 
     """Update the goal's information if the user wants to change it after creating it"""
     def update_goal(self, goal_id: int, user_id: int, description: str = None, goal_amount: float = None, current_amount: float = None) -> Goal:
@@ -48,6 +64,7 @@ class GoalCrud:
             goal.current_amount = current_amount
             if goal.current_amount >= goal.target_amount:
                 goal.status = "completed"
+        self._auto_complete_goal(goal)
         self._db.commit()
         self._db.refresh(goal)
         return goal    
