@@ -11,8 +11,8 @@ class Goal(Base):
     target_amount = Column(Float, nullable=False)
     current_amount = Column(Float, default=0.0)
     status = Column(String, default="current")  #tracking status of the goal
-    start_date= Column(Date, nullable=True)
-    end_date= Column(Date, nullable=True)
+    start_date= Column(Date, nullable=False)
+    end_date= Column(Date, nullable=False)
     
     # Relationships
     user = relationship("User", back_populates="goals")

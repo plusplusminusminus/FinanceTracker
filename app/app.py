@@ -49,9 +49,9 @@ class FinanceApp:
         return self._transactions
     
     def login(self, email, password):
-        success, message = self._authentication.login(email, password)
-        if success:
-            self._session_manager.login(email)
+        success, user, message = self._authentication.login(email, password)
+        if success and user:
+            self._session_manager.login(user)
             print(message)
             return True
         else:

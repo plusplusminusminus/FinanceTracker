@@ -10,15 +10,15 @@ class Authentication:
 
     def login(self, email: str, password: str):
         if not email or not password:
-            return False, "Email and password are required"
+            return False, None, "Email and password are required"
         try:
             user = self._user_crud.authenticate_user(email, password)
             if user:
-                return True, "Loging successful"
+                return True, user, "Loging successful"
             else:
-                return False, "Invalid login credentials"
+                return False, None, "Invalid login credentials"
         except Exception as e:
-            return False, f"Error logging in: {e}"
+            return False, None, f"Error logging in: {e}"
 
     def register(self, username: str, email: str, password: str, birthdate: date = None): 
         if not username or not email or not password:

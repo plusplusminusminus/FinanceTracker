@@ -14,13 +14,15 @@ class Goals:
             return False, "Goal amount must be greater than 0"
         if current_amount < 0.0:
             return False, "Current amount must be greater than 0"
+        if not start_date or not end_date:
+            return False, "Start date and end date are required"
         try:
-            if start_date:
-                start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-            if end_date:
-                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
             goal = self._goal_crud.create_goal(user_id, goal_description, goal_amount, current_amount, start_date, end_date)
             return True, "Successfully created goal"
+        except ValueError:
+            return False, "Invalid date format"
         except Exception as e:
             return False, f"Error creating goal: {e}"
     
@@ -33,14 +35,14 @@ class Goals:
     def get_current_goals(self, user_id: int):
         try:
             return self._goal_crud.get_current_goals_by_user(user_id)
-        except Exception as e:
-            return False, f"Error getting current goals: {e}"
+        except Exception:
+            return []
     
     def get_completed_goals(self, user_id: int):
         try:
             return self._goal_crud.get_completed_goals_by_user(user_id)
-        except Exception as e:
-            return False, f"Error getting compelted goals: {e}"
+        except Exception:
+            return []
     
     def update_goal_progress(self, goal_id: int, user_id: int, amount_to_add: float):
         try:
@@ -56,6 +58,15 @@ class Goals:
     def get_goal_progress(self, user_id: int, goal_id: int):
         return self._goal_crud.get_goal_completion_percentage(user_id, goal_id)
     
+    def get_goal_by_id(self, user_id: int, goal_id: int):
+        try:
+            goal = self._goal_crud.get_goal_by_id(goal_id, user_id)
+            if not goal:
+                return None
+            return goal
+        except Exception as e:
+            return None
+    
     def delete_user_goal(self, user_id: int, goal_id: int):
         try:
             deleted = self._goal_crud.delete_goal(user_id, goal_id)
@@ -65,6 +76,8 @@ class Goals:
         except Exception as e:
             return False, f"Error deleting goal: {e}"
     
+    #NOTE: I might not implement this since there might not be enough time, to be honest, 
+    # it's not really needed since the user can just delete and create a new goal again
     def update_goal(self, goal_id: int, user_id: int, description: str = None, goal_amount: float = None, current_amount: float = None, start_date: str = None, end_date: str = None):
         try:
             goal = self._goal_crud.update_goal(goal_id, user_id, description, goal_amount, current_amount, start_date, end_date)

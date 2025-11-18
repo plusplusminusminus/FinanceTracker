@@ -2,5 +2,3 @@
 from app.app import FinanceApp
 
 app = FinanceApp()
-
-app.run()
