@@ -5,12 +5,13 @@ from database.crud.transaction_crud import TransactionCrud
 class Transactions:
     def __init__(self, db: Session):
         self._db = db
+        self._transaction_crud = TransactionCrud(db)
 
     def add_expense(self, user_id: int, category_id: int, amount: float, description: str = None):
-        return self._transaction_crud.create_transaction(self._db, user_id, category_id, amount, "expense", description)
+        return self._transaction_crud.create_transaction(user_id, category_id, amount, "expense", description)
 
     def add_income(self, user_id: int, category_id: int, amount: float, description: str = None):
-        return self._transaction_crud.create_transaction(self._db, user_id, category_id, amount, "income", description)
+        return self._transaction_crud.create_transaction(user_id, category_id, amount, "income", description)
 
     def get_transaction_by_id(self, user_id: int, transaction_id: int):
         return self._transaction_crud.get_transaction_by_id(transaction_id, user_id)
@@ -25,7 +26,7 @@ class Transactions:
         return self._transaction_crud.get_transaction_by_date(user_id, date)
 
     def get_user_transactions(self, user_id: int):
-        return self._transaction_crud.get_transaction_by_user(self._db, user_id)
+        return self._transaction_crud.get_transaction_by_user(user_id)
 
     def get_expense_by_category(self, user_id: int, start_date: datetime = None, end_date: datetime = None):
         return self._transaction_crud.get_expense_by_category(user_id, start_date, end_date)

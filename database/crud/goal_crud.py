@@ -7,6 +7,8 @@ class GoalCrud:
 
     """Create a new goal for the user"""
     def create_goal(self, user_id: int, goal_description: str, goal_amount: float, current_amount: float = 0.0, start_date: date = None, end_date: date = None) -> Goal:
+        if start_date is None or end_date is None:
+            raise ValueError("The start date and end date are required for the goal")
         status = "completed" if current_amount >= goal_amount else "current"
         goal = Goal(
             user_id = user_id,

@@ -179,7 +179,7 @@ class DashboardWindow(MainWindow):
         AccountWindow(self.app)
 
     def sign_out(self):
-        self.app.authentication.logout()
+        self.app.session_manager.logout()
         self.root.destroy()
         LoginWindow(self.app)
 
@@ -396,7 +396,10 @@ class GoalsWindow(MainWindow):
         self.completed_goal_delete_button.config(state="disabled")
 
         # get the current and completed goals that are tied to the current user based on their user id
-        user_id = self.app.session_manager.current_user.id
+        current_user = self.app.session_manager.current_user
+        if not current_user:
+            return
+        user_id = current_user.id
         current_goals = self.app.goals.get_current_goals(user_id)
         completed_goals = self.app.goals.get_completed_goals(user_id)
 
@@ -484,6 +487,11 @@ class GoalsWindow(MainWindow):
         # get the ids of all the selected goals
         selected_goal_id = self.get_selected_goal_ids(self.current_goals_tree)
         try:
+            current_user = self.app.session_manager.current_user
+            if not current_user:
+                messagebox.showerror("Error", "Need to be logged in to add the amount to thegoals")
+                return
+            
             # get the amount to add from the entry by the user
             amount_to_add = float(self.current_amount_entry.get().strip())
             if amount_to_add <= 0:
@@ -492,7 +500,7 @@ class GoalsWindow(MainWindow):
 
             # update the current amount to all of the selected goals and update the progress percentage
             for goal_id in selected_goal_id:
-                status, message = self.app.goals.update_goal_progress(goal_id, self.app.session_manager.current_user.id,
+                status, message = self.app.goals.update_goal_progress(goal_id, current_user.id,
                                                                       amount_to_add)
                 if not status:
                     messagebox.showerror("Error", message)
@@ -507,9 +515,14 @@ class GoalsWindow(MainWindow):
         # get the ids of all the selected goals
         selected_goal_id = self.get_selected_goal_ids(self.current_goals_tree)
         try:
+            current_user = self.app.session_manager.current_user
+            if not current_user:
+                messagebox.showerror("Error", "Need to be logged in to complete goals")
+                return
+            
             # mark all of the selected goals as completed
             for goal_id in selected_goal_id:
-                status, message = self.app.goals.mark_goal_completed(self.app.session_manager.current_user.id, goal_id)
+                status, message = self.app.goals.mark_goal_completed(current_user.id, goal_id)
                 if not status:
                     messagebox.showerror("Error", message)
             messagebox.showinfo("Success", f"Successfully marked {len(selected_goal_id)} selected goals as completed")
@@ -522,8 +535,13 @@ class GoalsWindow(MainWindow):
         selected_goal_id = self.get_selected_goal_ids(tree)
         # delete the goals that are selected from the tree for the user
         try:
+            current_user = self.app.session_manager.current_user
+            if not current_user:
+                messagebox.showerror("Error", "Need to be logged in to delete goals")
+                return
+            
             for goal_id in selected_goal_id:
-                status, message = self.app.goals.delete_user_goal(self.app.session_manager.current_user.id, goal_id)
+                status, message = self.app.goals.delete_user_goal(current_user.id, goal_id)
                 if not status:
                     messagebox.showerror("Error", message)
             messagebox.showinfo("Success", f"Successfully deleted {len(selected_goal_id)} selected goals")
@@ -543,7 +561,11 @@ class GoalsWindow(MainWindow):
         # get the ids of the selected goals from the complete goal tree that we want to reactiveate
         # Also keep count of how many goals were reactivated and how manyt failed depending on their end date
         selected_goal_id = self.get_selected_goal_ids(self.completed_goals_tree)
-        user_id = self.app.session_manager.current_user.id
+        current_user = self.app.session_manager.current_user
+        if not current_user:
+            messagebox.showerror("Error", "Need to be logged in to reactivate goals")
+            return
+        user_id = current_user.id
         reactivated_count = 0
         skipped_count = 0
 
@@ -697,6 +719,6 @@ class AccountWindow(MainWindow):
         DashboardWindow(self.app)
 
     def sign_out(self):
-        self.app.authentication.logout()
+        self.app.session_manager.logout()
         self.root.destroy()
         LoginWindow(self.app)

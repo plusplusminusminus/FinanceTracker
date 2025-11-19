@@ -54,6 +54,7 @@ class FinanceApp:
         user = self._user_crud.authenticate_user(email, password)
         if user:
             print(user.username)
+            self._session_manager.login(user)
             return user
         else:
             print("Invalid credentials")
