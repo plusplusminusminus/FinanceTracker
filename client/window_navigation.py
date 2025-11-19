@@ -359,8 +359,13 @@ class GoalsWindow(MainWindow):
                 messagebox.showerror("Error", "Invalid date format. Please use YYYY-MM-DD")
                 return
 
-            # creat ehte goal for the user and have it belongs to their id
-            user_id = self.app.session_manager.current_user.id
+            # create the goal for the user and have it belongs to their id
+            current_user = self.app.session_manager.current_user
+            if not current_user:
+                messagebox.showerror("Error", "Need to be logged in to create goals")
+                return
+            
+            user_id = current_user.id
             status, message = self.app.goals.create_goal(user_id, description, target, current, goal_start_date,
                                                          goal_end_date)
             if status:
@@ -662,7 +667,6 @@ class InputTransactionWindow(MainWindow):
 
 class TransactionHistoryWindow(MainWindow):
     pass
-
 
 class AccountWindow(MainWindow):
     def __init__(self, app):

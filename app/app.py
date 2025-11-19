@@ -5,7 +5,7 @@ from client.window_navigation import MainWindow
 from app.sessions import SessionManager
 from app.authentication import Authentication
 from app.goals import Goals
-# from app.transactions import Transactions
+from app.transactions import Transactions
 
 from client.window_navigation import LoginWindow
 
@@ -17,10 +17,9 @@ class FinanceApp:
         self._authentication = Authentication(self._db)
         self._goals = Goals(self._db)
         self._user_crud = UserCrud(self._db)
-        self._main_window = MainWindow(self.login)
-        # self._transactions = Transactions(self._db)
+        self._transactions = Transactions(self._db)
 
-        self.main_window = LoginWindow(self.login)
+        self.main_window = LoginWindow(self)
 
     def _initialize_database(self):
         Base.metadata.create_all(bind=engine)
