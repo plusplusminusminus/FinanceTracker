@@ -18,6 +18,7 @@ class FinanceApp:
         self._goals = Goals(self._db)
         self._user_crud = UserCrud(self._db)
         self._transactions = Transactions(self._db)
+        self._category_crud = CategoryCrud(self._db)
 
         self.main_window = LoginWindow(self)
 
@@ -49,6 +50,10 @@ class FinanceApp:
     @property
     def transactions(self):
         return self._transactions
+
+    @property
+    def category_crud(self):
+        return self._category_crud
 
     def login(self, email, password):
         user = self._user_crud.authenticate_user(email, password)

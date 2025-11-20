@@ -650,14 +650,42 @@ class InputTransactionWindow(MainWindow):
 
     def add_income(self):
         category = self.selected_income_category.get()
-        amount = self.income_entry.get().strip()
-        if not amount:
+        amount_str = self.income_entry.get().strip()
+        if not amount_str:
             messagebox.showerror("Error", "Please enter an amount.")
             return
 
-        # For now just add a dummy entry to treeview
-        fallback_icon = ImageTk.PhotoImage(Image.open(os.path.join(icon_directory, "shopping.png")).resize((16, 16)))
-        self.tree.insert("", tk.END, text=category, image=fallback_icon, values=(amount,))
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                messagebox.showerror("Error", "Amount must be greater than 0.")
+                return
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid number.")
+            return
+
+        current_user = self.app.session_manager.current_user
+        if not current_user:
+            messagebox.showerror("Error", "Need to be logged in to add transactions.")
+            return
+
+        # Get the category that the income is under so we can have a relationship where each transaction has a category
+        category_obj = self.app.category_crud.get_category_by_name(category)
+        if not category_obj:
+            messagebox.showerror("Error", f"Category '{category}' not found.")
+            return
+
+        # Add the income that the user entered into the transaction database
+        try:
+            transaction = self.app.transactions.add_income(
+                user_id=current_user.id,
+                category_id=category_obj.id,
+                amount=amount
+            )
+            messagebox.showinfo("Success", f"Added income: {category}, ${amount:.2f}")
+            self.income_entry.delete(0, tk.END)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to add income: {str(e)}")
 
     def create_expense_tab(self):
         self.expense_frame = tk.Frame(self.notebook)
@@ -677,18 +705,127 @@ class InputTransactionWindow(MainWindow):
 
     def add_expense(self):
         category = self.selected_expense_category.get()
-        amount = self.expense_entry.get().strip()
-        if not amount:
+        amount_str = self.expense_entry.get().strip()
+        if not amount_str:
             messagebox.showerror("Error", "Please enter an amount.")
             return
-        print(f"Added expense: {category}, ${amount}")
+
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                messagebox.showerror("Error", "Amount must be greater than 0.")
+                return
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid number.")
+            return
+
+        current_user = self.app.session_manager.current_user
+        if not current_user:
+            messagebox.showerror("Error", "Need to be logged in to add transactions.")
+            return
+
+        #Get the category that the expense is under so we can have a relationship where each transaction has a category
+        category_obj = self.app.category_crud.get_category_by_name(category)
+        if not category_obj:
+            messagebox.showerror("Error", f"Category '{category}' not found.")
+            return
+
+        #Add the expense that the user entered into the transaction database
+        try:
+            transaction = self.app.transactions.add_expense(
+                user_id=current_user.id,
+                category_id=category_obj.id,
+                amount=amount
+            )
+            messagebox.showinfo("Success", f"Added expense: {category}, ${amount:.2f}")
+            self.expense_entry.delete(0, tk.END)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to add expense: {str(e)}")
 
     def return_back(self):
         self.root.destroy()
         DashboardWindow(self.app)
 
 class TransactionHistoryWindow(MainWindow):
-    pass
+    def __init__(self, app):
+        super().__init__(app)
+        self.root.title("Transaction History Window")
+        self.root.geometry("900x650")
+
+        nav_bar = tk.Frame(self.root)
+        nav_bar.pack(fill="x", pady=8)
+        tk.Button(nav_bar, text="Back to Dashboard", command=self.return_back).pack(side="left", padx=6)
+
+        self.transaction_history_frame = tk.LabelFrame(self.root, text="TRANSACTION HISTORY")
+        self.transaction_history_frame.pack(fill="both", expand=True, padx=16, pady=8)
+        # frame for the tree view of the list of transactions
+        transaction_history_tree_frame = tk.Frame(self.transaction_history_frame)
+        transaction_history_tree_frame.pack(fill="both", expand=True, padx=8, pady=8)
+
+        current_scroll_bar = ttk.Scrollbar(transaction_history_tree_frame, orient="vertical")
+        current_scroll_bar.pack(side="right", fill="y")
+
+        self.transaction_history_tree = ttk.Treeview(transaction_history_tree_frame, columns=(
+        "category", "amount", "type", "description", "created_on"),
+                                               show="headings", yscrollcommand=current_scroll_bar.set, height=6,
+                                               selectmode="extended")
+        current_scroll_bar.config(command=self.transaction_history_tree.yview)
+        self.transaction_history_tree.heading("category", text="Category")
+        self.transaction_history_tree.heading("amount", text="Amount")
+        self.transaction_history_tree.heading("type", text="Type")
+        self.transaction_history_tree.heading("description", text="Description")
+        self.transaction_history_tree.heading("created_on", text="Created On")
+        self.transaction_history_tree.column("category", width=180)
+        self.transaction_history_tree.column("amount", width=120)
+        self.transaction_history_tree.column("type", width=100)
+        self.transaction_history_tree.column("description", width=180)
+        self.transaction_history_tree.column("created_on", width=110)
+        self.transaction_history_tree.pack(side="left", fill="both", expand=True)
+        self.transaction_history_tree.bind("<<TreeviewSelect>>", self.on_transaction_history_select)
+
+        self.refresh_transaction_history()
+        self.root.mainloop()
+
+    def refresh_transaction_history(self):
+        # Clear the treeview to avoid duplicates
+        for item in self.transaction_history_tree.get_children():
+            self.transaction_history_tree.delete(item)
+
+        # Get the current user's transactions
+        current_user = self.app.session_manager.current_user
+        if not current_user:
+            return
+        
+        user_id = current_user.id
+        transactions = self.app.transactions.get_user_transactions(user_id)
+        
+        # Sort transactions by created_on date (most recent first)
+        transactions = sorted(transactions, key=lambda t: t.created_on, reverse=True)
+        
+        # Add transactions to the treeview
+        for transaction in transactions:
+            # Get category name from the relationship
+            category_name = transaction.category.name if transaction.category else "Unknown"
+            amount_str = f"${transaction.amount:.2f}"
+            type_str = transaction.type.capitalize()
+            description_str = transaction.description if transaction.description else ""
+            created_on_str = transaction.created_on.strftime("%Y-%m-%d %H:%M:%S") if transaction.created_on else ""
+            
+            self.transaction_history_tree.insert("", "end", values=(
+                category_name, amount_str, type_str, description_str, created_on_str
+            ), tags=(str(transaction.id),))
+
+    def on_transaction_history_select(self, event):
+        # Handler for when a transaction is selected in the treeview
+        selected_items = self.transaction_history_tree.selection()
+        # Add any logic here if needed when transactions are selected
+        pass
+
+    def return_back(self):
+        self.root.destroy()
+        DashboardWindow(self.app)
+
+
 
 class AccountWindow(MainWindow):
     def __init__(self, app):
