@@ -1,13 +1,13 @@
 from database.db_config import SessionLocal, Base, engine
 from database.crud.category_crud import CategoryCrud
 from database.crud.user_crud import UserCrud
-from client.window_navigation import MainWindow
+from client.windows.base_window import MainWindow
 from app.sessions import SessionManager
 from app.authentication import Authentication
 from app.goals import Goals
 from app.transactions import Transactions
 
-from client.window_navigation import LoginWindow
+from client.windows.login_window import LoginWindow
 
 class FinanceApp:
     def __init__(self):

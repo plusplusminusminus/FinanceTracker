@@ -22,8 +22,8 @@ class Transactions:
     def get_transactions_by_category(self, user_id: int, category_id: int):
         return self._transaction_crud.get_transaction_by_category(user_id, category_id)
 
-    def get_transactions_by_date(self, user_id: int, date: datetime):
-        return self._transaction_crud.get_transaction_by_date(user_id, date)
+    def get_transactions_by_date(self, user_id: int, start_date: datetime = None, end_date: datetime = None):
+        return self._transaction_crud.get_transaction_by_date(user_id, start_date, end_date)
 
     def get_user_transactions(self, user_id: int):
         return self._transaction_crud.get_transaction_by_user(user_id)
@@ -34,6 +34,14 @@ class Transactions:
     def get_income_by_category(self, user_id: int, start_date: datetime = None, end_date: datetime = None):
         return self._transaction_crud.get_income_by_category(user_id, start_date, end_date)
 
+    def delete_user_transaction(self, user_id, transaction_id):
+        try:
+            deleted = self._transaction_crud.delete_transaction(user_id, transaction_id)
+            if not deleted:
+                return False, "Transaction not found"
+            return True, "Deleted transaction successfully"
+        except Exception as e:
+            return False, f"Error deleting transaction: {e}"
     # for debugging
     def print_all_transactions(self, user_id: int):
         txs = self.get_user_transactions(user_id)

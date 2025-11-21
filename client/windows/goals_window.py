@@ -1,190 +1,12 @@
-import os
+"""Goals window for creating and managing financial goals."""
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, date
-from PIL import Image, ImageTk
-
-icon_directory = "icons"
-
-icon_dictionary = {
-    "Shopping": "shopping.png",
-    "Transport": "transport.png",
-    "Salary": "salary.png",
-    "Credit Card Payment": "credit_card_payment.png",
-    "Groceries": "groceries.png",
-    "Car Payment": "car_payment.png",
-    "Rent/Mortgage": "rent_mortgage.png",
-    "Utilities": "utilities.png",
-    "Entertainment": "entertainment.png",
-    "Healthcare": "healthcare.png",
-    "Education": "education.png",
-    "Gift": "gift.png",
-    "Investment": "investment.png",
-    "Other": "other.png",
-}
-
-def load_icon(category):
-    path = os.path.join(icon_directory, icon_dictionary[category])
-    path = os.path.abspath(path)
-
-    try:
-        print(path)
-        IMG = Image.open(path).resize((16,16))
-        return ImageTk.PhotoImage(IMG)
-    except:
-        print("Could not load icon")
-
-class AmountEntry:
-    def __init__(self, icon, category, amount):
-        self.icon = icon
-        self.category = category
-        self.amount = amount
-
-class MainWindow:
-    def __init__(self, app):
-        self.app = app
-        self.root = tk.Tk()
-        # close the app and destroy the window when the user click on the x button to close
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
-    def on_close(self):
-        try:
-            self.app.close()
-        finally:
-            self.root.destroy()
-
-
-class LoginWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Login Window")
-        self.root.geometry("400x400")
-
-        # Email label + entry
-        tk.Label(self.root, text="Email").pack(anchor="w", padx=16, pady=(16, 2))
-        self.email_value = tk.StringVar()
-        tk.Entry(self.root, textvariable=self.email_value).pack(fill="x", padx=16)
-
-        # Password label + entry
-        tk.Label(self.root, text="Password").pack(anchor="w", padx=16, pady=(12, 2))
-        self.password_value = tk.StringVar()
-        tk.Entry(self.root, textvariable=self.password_value).pack(fill="x", padx=16)
-
-        # Login function
-        tk.Button(self.root, text="Login", command=self.on_login).pack(pady=12)
-        tk.Button(self.root, text="Sign Up", command=self.open_sign_up_window).pack()
-
-        self.root.mainloop()
-
-    def on_login(self):
-        email = self.email_value.get().strip()
-        password = self.password_value.get().strip()
-
-        if not email or not password:
-            messagebox.showerror("Error", "Email and password are required")
-            return
-
-        is_logged_in = self.app.login(email, password)
-        if is_logged_in:
-            self.root.destroy()
-            DashboardWindow(self.app)
-        else:
-            messagebox.showerror("Error", "Invalid login credentials")
-
-    def open_sign_up_window(self):
-        self.root.destroy()
-        SignUpWindow(self.app)
-
-
-class SignUpWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Sign Up Window")
-        self.root.geometry("400x400")
-
-        self.username_value = tk.StringVar()
-        self.email_value = tk.StringVar()
-        self.password_value = tk.StringVar()
-        self.birthdate_value = tk.StringVar()
-
-        tk.Label(self.root, text="Username").pack(anchor="w", padx=16, pady=(16, 2))
-        tk.Entry(self.root, textvariable=self.username_value).pack(fill="x", padx=16)
-
-        tk.Label(self.root, text="Email").pack(anchor="w", padx=16, pady=(10, 2))
-        tk.Entry(self.root, textvariable=self.email_value).pack(fill="x", padx=16)
-
-        tk.Label(self.root, text="Password").pack(anchor="w", padx=16, pady=(10, 2))
-        tk.Entry(self.root, textvariable=self.password_value, show="*").pack(fill="x", padx=16)
-
-        tk.Label(self.root, text="Birthdate (YYYY-MM-DD)").pack(anchor="w", padx=16, pady=(10, 2))
-        tk.Entry(self.root, textvariable=self.birthdate_value).pack(fill="x", padx=16)
-
-        tk.Button(self.root, text="Create Account", command=self.on_create_account).pack(pady=14)
-        tk.Button(self.root, text="Back to Sign In", command=self.return_back).pack()
-
-        self.root.mainloop()
-
-    def on_create_account(self):
-        try:
-            date = self.birthdate_value.get().strip()
-            if date:
-                birthdate = datetime.strptime(date, "%Y-%m-%d").date()
-                username = self.username_value.get().strip()
-                email = self.email_value.get().strip()
-                password = self.password_value.get().strip()
-                status, message = self.app.authentication.register(username, email, password, birthdate)
-                if status:
-                    messagebox.showinfo("Success", message)
-                    self.return_back()
-                else:
-                    messagebox.showerror("Error", message)
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-
-    def return_back(self):
-        self.root.destroy()
-        LoginWindow(self.app)
-
-
-class DashboardWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Dashboard Window")
-        self.root.geometry("400x400")
-
-        nav_bar = tk.Frame(self.root)
-        nav_bar.pack(fill="x", pady=10)
-        tk.Button(nav_bar, text="Input Transactions", command=self.open_input_transaction).pack(side="left", padx=6)
-        tk.Button(nav_bar, text="Transaction History", command=self.open_transaction_history).pack(side="left", padx=6)
-        tk.Button(nav_bar, text="Goals", command=self.open_goals).pack(side="left", padx=6)
-        tk.Button(nav_bar, text="Account", command=self.open_account).pack(side="left", padx=6)
-        tk.Button(nav_bar, text="Sign Out", command=self.sign_out).pack(side="right", padx=6)
-
-        self.root.mainloop()
-
-    def open_input_transaction(self):
-        self.root.destroy()
-        InputTransactionWindow(self.app)
-
-    def open_transaction_history(self):
-        self.root.destroy()
-        TransactionHistoryWindow(self.app)
-
-    def open_goals(self):
-        self.root.destroy()
-        GoalsWindow(self.app)
-
-    def open_account(self):
-        self.root.destroy()
-        AccountWindow(self.app)
-
-    def sign_out(self):
-        self.app.session_manager.logout()
-        self.root.destroy()
-        LoginWindow(self.app)
+from .base_window import MainWindow
 
 
 class GoalsWindow(MainWindow):
+    """Window GUI and functions for creating and managing financial goals."""
     def __init__(self, app):
         super().__init__(app)
         self.root.title("Goals Window")
@@ -234,10 +56,7 @@ class GoalsWindow(MainWindow):
         current_scroll_bar = ttk.Scrollbar(current_goals_tree_frame, orient="vertical")
         current_scroll_bar.pack(side="right", fill="y")
 
-        self.current_goals_tree = ttk.Treeview(current_goals_tree_frame, columns=(
-        "description", "target_amount", "current_amount", "progress_percentage", "start_date", "end_date"),
-                                               show="headings", yscrollcommand=current_scroll_bar.set, height=6,
-                                               selectmode="extended")
+        self.current_goals_tree = ttk.Treeview(current_goals_tree_frame, columns=("description", "target_amount", "current_amount", "progress_percentage", "start_date", "end_date"), show="headings", yscrollcommand=current_scroll_bar.set, height=6, selectmode="extended")
         current_scroll_bar.config(command=self.current_goals_tree.yview)
         self.current_goals_tree.heading("description", text="Description")
         self.current_goals_tree.heading("target_amount", text="Target Amount")
@@ -284,10 +103,7 @@ class GoalsWindow(MainWindow):
         completed_scroll_bar = ttk.Scrollbar(completed_goals_tree_frame, orient="vertical")
         completed_scroll_bar.pack(side="right", fill="y")
 
-        self.completed_goals_tree = ttk.Treeview(completed_goals_tree_frame, columns=(
-        "description", "target_amount", "current_amount", "progress_percentage", "start_date", "end_date"),
-                                                 show="headings", yscrollcommand=completed_scroll_bar.set, height=6,
-                                                 selectmode="extended")
+        self.completed_goals_tree = ttk.Treeview(completed_goals_tree_frame, columns=("description", "target_amount", "current_amount", "progress_percentage", "start_date", "end_date"),show="headings", yscrollcommand=completed_scroll_bar.set, height=6,selectmode="extended")
         completed_scroll_bar.config(command=self.completed_goals_tree.yview)
         self.completed_goals_tree.heading("description", text="Description")
         self.completed_goals_tree.heading("target_amount", text="Target Amount")
@@ -319,6 +135,7 @@ class GoalsWindow(MainWindow):
         self.root.mainloop()
 
     def create_goal(self):
+        """Create a new goal for the user based on the details the entered."""
         # get the values that the user entered in the fields
         try:
             description = self.goal_description.get().strip()
@@ -382,6 +199,7 @@ class GoalsWindow(MainWindow):
             messagebox.showerror("Error", str(e))
 
     def refresh_lists(self):
+        """Refresh the goals lists to show the most updated list of goals."""
         # clear the tree views so there isnt a duplicated list of goals that keep stacking on top of each other
         for item in self.current_goals_tree.get_children():
             self.current_goals_tree.delete(item)
@@ -403,7 +221,7 @@ class GoalsWindow(MainWindow):
         current_goals = self.app.goals.get_current_goals(user_id)
         completed_goals = self.app.goals.get_completed_goals(user_id)
 
-        # all the curent goals that belongs to the current user to the tree view
+        # add the curent goals that belongs to the current user to the tree view
         for goal in current_goals:
             start_date_str = str(goal.start_date)
             end_date_str = str(goal.end_date)
@@ -434,6 +252,7 @@ class GoalsWindow(MainWindow):
             end_date_str), tags=(str(goal.id),))
 
     def on_current_goal_select(self, event):
+        """Enable the buttons for the current goals tree and disable the buttons for the completed goals tree if the user selects a goal in the current goals tree."""
         selected_items = self.current_goals_tree.selection()
 
         # remove any seelction from the completed goals tree to avoid having rows in both tree being selected
@@ -454,6 +273,7 @@ class GoalsWindow(MainWindow):
             self.current_goal_delete_button.config(state="disabled")
 
     def on_completed_goal_select(self, event):
+        """Enable the buttons for the completed goals tree and disable the buttons for the current goals tree if the user selects a goal in the completed goals tree."""
         selected_items = self.completed_goals_tree.selection()
 
         # remove any seelction from the current goals tree to avoid having rows in both tree being selected
@@ -473,8 +293,7 @@ class GoalsWindow(MainWindow):
             self.completed_goal_delete_button.config(state="disabled")
 
     def get_selected_goal_ids(self, tree):
-
-        # get the ids of all the selected goals in the tree using their tags
+        """Get the ids of all the selected goals in the tree using their tags."""
         selected_goals = tree.selection()
         goal_ids = []
         for goal in selected_goals:
@@ -484,6 +303,7 @@ class GoalsWindow(MainWindow):
         return goal_ids
 
     def add_amount_to_selected_goal(self):
+        """Add money amount to the selected goals."""
         # get the ids of all the selected goals
         selected_goal_id = self.get_selected_goal_ids(self.current_goals_tree)
         try:
@@ -492,7 +312,7 @@ class GoalsWindow(MainWindow):
                 messagebox.showerror("Error", "Need to be logged in to add the amount to thegoals")
                 return
             
-            # get the amount to add from the entry by the user
+            # get the amount to add from the entry by the user and chec kif its not a negative numeer
             amount_to_add = float(self.current_amount_entry.get().strip())
             if amount_to_add <= 0:
                 messagebox.showerror("Error", "The amount to add must be greater than 0")
@@ -512,6 +332,7 @@ class GoalsWindow(MainWindow):
             messagebox.showerror("Error", str(e))
 
     def completes_current_selected_goal(self):
+        """Mark the selected goals in the current goals tree as completed."""
         # get the ids of all the selected goals
         selected_goal_id = self.get_selected_goal_ids(self.current_goals_tree)
         try:
@@ -531,6 +352,7 @@ class GoalsWindow(MainWindow):
             messagebox.showerror("Error", str(e))
 
     def delete_selected_goals(self, tree):
+        """Delete the selected goals from the tree"""
         # get the ids of all the selecvte goals from the tree, either the current or completed goals tree
         selected_goal_id = self.get_selected_goal_ids(tree)
         # delete the goals that are selected from the tree for the user
@@ -549,15 +371,16 @@ class GoalsWindow(MainWindow):
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    # delete the goals from the current goals tree
     def delete_current_selected_goal(self):
+        """Delete the goals from the current goals tree."""
         self.delete_selected_goals(self.current_goals_tree)
 
-    # delete the goals freom the completed goals tree
     def delete_selected_completed_goal(self):
+        """Delete the goals freom the completed goals tree."""
         self.delete_selected_goals(self.completed_goals_tree)
 
     def reactivate_selected_completed_goal(self):
+        """Reactivate the selected completed goals in the completed goals tree."""
         # get the ids of the selected goals from the complete goal tree that we want to reactiveate
         # Also keep count of how many goals were reactivated and how manyt failed depending on their end date
         selected_goal_id = self.get_selected_goal_ids(self.completed_goals_tree)
@@ -606,256 +429,9 @@ class GoalsWindow(MainWindow):
             messagebox.showerror("Error", str(e))
 
     def return_back(self):
-        self.root.destroy()
-        DashboardWindow(self.app)
-
-
-class InputTransactionWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Input Expenses & Income")
-        self.root.geometry("600x500")
-
-        # Back button
-        tk.Button(self.root, text="Back to Dashboard", command=self.return_back).pack(pady=8)
-
-        # Create tabbed interface
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(expand=True, fill="both")
-
-        self.create_income_tab()
-        self.create_expense_tab()
-
-        self.notebook.add(self.income_frame, text="Income")
-        self.notebook.add(self.expense_frame, text="Expenses")
-
-        self.root.mainloop()
-
-    def create_income_tab(self):
-        self.income_frame = tk.Frame(self.notebook)
-        self.income_categories = ["Salary", "Investment", "Other"]
-
-        self.selected_income_category = tk.StringVar(value=self.income_categories[0])
-        tk.OptionMenu(self.income_frame, self.selected_income_category, *self.income_categories).pack(pady=6)
-
-        self.income_entry = tk.Entry(self.income_frame, width=30)
-        self.income_entry.pack(pady=4)
-
-        tk.Button(self.income_frame, text="Submit Income", command=self.add_income).pack(pady=4)
-
-        self.tree = ttk.Treeview(self.income_frame, columns=("Amount"), show="tree headings", height=8)
-        self.tree.pack(fill=tk.BOTH, expand=True, pady=8)
-        self.tree.heading("#0", text="Category")
-        self.tree.heading("Amount", text="Amount")
-
-    def add_income(self):
-        category = self.selected_income_category.get()
-        amount_str = self.income_entry.get().strip()
-        if not amount_str:
-            messagebox.showerror("Error", "Please enter an amount.")
-            return
-
-        try:
-            amount = float(amount_str)
-            if amount <= 0:
-                messagebox.showerror("Error", "Amount must be greater than 0.")
-                return
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a valid number.")
-            return
-
-        current_user = self.app.session_manager.current_user
-        if not current_user:
-            messagebox.showerror("Error", "Need to be logged in to add transactions.")
-            return
-
-        # Get the category that the income is under so we can have a relationship where each transaction has a category
-        category_obj = self.app.category_crud.get_category_by_name(category)
-        if not category_obj:
-            messagebox.showerror("Error", f"Category '{category}' not found.")
-            return
-
-        # Add the income that the user entered into the transaction database
-        try:
-            transaction = self.app.transactions.add_income(
-                user_id=current_user.id,
-                category_id=category_obj.id,
-                amount=amount
-            )
-            messagebox.showinfo("Success", f"Added income: {category}, ${amount:.2f}")
-            self.income_entry.delete(0, tk.END)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to add income: {str(e)}")
-
-    def create_expense_tab(self):
-        self.expense_frame = tk.Frame(self.notebook)
-        self.expense_categories = [
-            "Shopping", "Transport", "Groceries", "Car Payment", "Credit Card Payment",
-            "Rent/Mortgage", "Utilities", "Entertainment", "Healthcare", "Education",
-            "Gift", "Other"
-        ]
-
-        self.selected_expense_category = tk.StringVar(value=self.expense_categories[0])
-        tk.OptionMenu(self.expense_frame, self.selected_expense_category, *self.expense_categories).pack(pady=6)
-
-        self.expense_entry = tk.Entry(self.expense_frame, width=30)
-        self.expense_entry.pack(pady=4)
-
-        tk.Button(self.expense_frame, text="Submit Expense", command=self.add_expense).pack(pady=4)
-
-    def add_expense(self):
-        category = self.selected_expense_category.get()
-        amount_str = self.expense_entry.get().strip()
-        if not amount_str:
-            messagebox.showerror("Error", "Please enter an amount.")
-            return
-
-        try:
-            amount = float(amount_str)
-            if amount <= 0:
-                messagebox.showerror("Error", "Amount must be greater than 0.")
-                return
-        except ValueError:
-            messagebox.showerror("Error", "Please enter a valid number.")
-            return
-
-        current_user = self.app.session_manager.current_user
-        if not current_user:
-            messagebox.showerror("Error", "Need to be logged in to add transactions.")
-            return
-
-        #Get the category that the expense is under so we can have a relationship where each transaction has a category
-        category_obj = self.app.category_crud.get_category_by_name(category)
-        if not category_obj:
-            messagebox.showerror("Error", f"Category '{category}' not found.")
-            return
-
-        #Add the expense that the user entered into the transaction database
-        try:
-            transaction = self.app.transactions.add_expense(
-                user_id=current_user.id,
-                category_id=category_obj.id,
-                amount=amount
-            )
-            messagebox.showinfo("Success", f"Added expense: {category}, ${amount:.2f}")
-            self.expense_entry.delete(0, tk.END)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to add expense: {str(e)}")
-
-    def return_back(self):
-        self.root.destroy()
-        DashboardWindow(self.app)
-
-class TransactionHistoryWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Transaction History Window")
-        self.root.geometry("900x650")
-
-        nav_bar = tk.Frame(self.root)
-        nav_bar.pack(fill="x", pady=8)
-        tk.Button(nav_bar, text="Back to Dashboard", command=self.return_back).pack(side="left", padx=6)
-
-        self.transaction_history_frame = tk.LabelFrame(self.root, text="TRANSACTION HISTORY")
-        self.transaction_history_frame.pack(fill="both", expand=True, padx=16, pady=8)
-        # frame for the tree view of the list of transactions
-        transaction_history_tree_frame = tk.Frame(self.transaction_history_frame)
-        transaction_history_tree_frame.pack(fill="both", expand=True, padx=8, pady=8)
-
-        current_scroll_bar = ttk.Scrollbar(transaction_history_tree_frame, orient="vertical")
-        current_scroll_bar.pack(side="right", fill="y")
-
-        self.transaction_history_tree = ttk.Treeview(transaction_history_tree_frame, columns=(
-        "category", "amount", "type", "description", "created_on"),
-                                               show="headings", yscrollcommand=current_scroll_bar.set, height=6,
-                                               selectmode="extended")
-        current_scroll_bar.config(command=self.transaction_history_tree.yview)
-        self.transaction_history_tree.heading("category", text="Category")
-        self.transaction_history_tree.heading("amount", text="Amount")
-        self.transaction_history_tree.heading("type", text="Type")
-        self.transaction_history_tree.heading("description", text="Description")
-        self.transaction_history_tree.heading("created_on", text="Created On")
-        self.transaction_history_tree.column("category", width=180)
-        self.transaction_history_tree.column("amount", width=120)
-        self.transaction_history_tree.column("type", width=100)
-        self.transaction_history_tree.column("description", width=180)
-        self.transaction_history_tree.column("created_on", width=110)
-        self.transaction_history_tree.pack(side="left", fill="both", expand=True)
-        self.transaction_history_tree.bind("<<TreeviewSelect>>", self.on_transaction_history_select)
-
-        self.refresh_transaction_history()
-        self.root.mainloop()
-
-    def refresh_transaction_history(self):
-        # Clear the treeview to avoid duplicates
-        for item in self.transaction_history_tree.get_children():
-            self.transaction_history_tree.delete(item)
-
-        # Get the current user's transactions
-        current_user = self.app.session_manager.current_user
-        if not current_user:
-            return
+        """Return to the dashboard window."""
+        from .dashboard_window import DashboardWindow
         
-        user_id = current_user.id
-        transactions = self.app.transactions.get_user_transactions(user_id)
-        
-        # Sort transactions by created_on date (most recent first)
-        transactions = sorted(transactions, key=lambda t: t.created_on, reverse=True)
-        
-        # Add transactions to the treeview
-        for transaction in transactions:
-            # Get category name from the relationship
-            category_name = transaction.category.name if transaction.category else "Unknown"
-            amount_str = f"${transaction.amount:.2f}"
-            type_str = transaction.type.capitalize()
-            description_str = transaction.description if transaction.description else ""
-            created_on_str = transaction.created_on.strftime("%Y-%m-%d %H:%M:%S") if transaction.created_on else ""
-            
-            self.transaction_history_tree.insert("", "end", values=(
-                category_name, amount_str, type_str, description_str, created_on_str
-            ), tags=(str(transaction.id),))
-
-    def on_transaction_history_select(self, event):
-        # Handler for when a transaction is selected in the treeview
-        selected_items = self.transaction_history_tree.selection()
-        # Add any logic here if needed when transactions are selected
-        pass
-
-    def return_back(self):
         self.root.destroy()
         DashboardWindow(self.app)
 
-
-
-class AccountWindow(MainWindow):
-    def __init__(self, app):
-        super().__init__(app)
-        self.root.title("Account Details Window")
-        self.root.geometry("400x400")
-
-        self.account_details_frame = tk.LabelFrame(self.root, text="ACCOUNT DETAILS")
-        self.account_details_frame.pack(fill="x", padx=16, pady=8)
-        current_user = self.app.session_manager.current_user
-        if current_user:
-            tk.Label(self.account_details_frame, text="Username/Email:").pack(anchor="w", padx=16, pady=(16, 2))
-            tk.Label(self.account_details_frame, text=f"{current_user.username} / {current_user.email}").pack(
-                anchor="w", padx=16)
-            tk.Label(self.account_details_frame, text="Birthdate:").pack(anchor="w", padx=16, pady=(10, 2))
-            tk.Label(self.account_details_frame, text=f"{current_user.birthdate}").pack(anchor="w", padx=16)
-
-        else:
-            tk.Label(self.account_details_frame, text="No user logged in").pack(pady=16)
-
-        tk.Button(self.root, text="Back to Dashboard", command=self.return_back).pack(pady=16)
-        tk.Button(self.root, text="Sign Out", command=self.sign_out).pack(pady=16)
-
-        self.root.mainloop()
-
-    def return_back(self):
-        self.root.destroy()
-        DashboardWindow(self.app)
-
-    def sign_out(self):
-        self.app.session_manager.logout()
-        self.root.destroy()
-        LoginWindow(self.app)
