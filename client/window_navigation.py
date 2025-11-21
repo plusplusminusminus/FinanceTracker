@@ -679,7 +679,15 @@ class InputTransactionWindow(MainWindow):
 
         amount_formatted = f"{amount:.2f}"
 
-        self.income_tree.insert("", tk.END, text=category, image=self.fallback_icon, values=(amount_formatted,))
+        # Get icon for category or use the fallback icon if the category icon is not found
+        icon = self.icons.get(category)
+        if not icon:
+            #initialziet he fallback icon if the category icon is not found and add it to the image refernces
+            fallback_icon = ImageTk.PhotoImage(Image.open(os.path.join(icon_directory, "other.png")).resize((16, 16)).convert("RGB"))
+            self.image_refs.append(fallback_icon)
+            icon = fallback_icon
+        
+        self.income_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted,))
 
     def create_expense_tab(self):
         self.expense_frame = tk.Frame(self.notebook)
@@ -722,9 +730,13 @@ class InputTransactionWindow(MainWindow):
 
         amount_formatted = f"{amount:.2f}"
 
-        # For now this adds a dummy entry to treeview
-        fallback_icon = ImageTk.PhotoImage(Image.open(os.path.join(icon_directory, "shopping.png")).resize((16, 16)).convert("RGB"))
-        self.expense_tree.insert("", tk.END, text=category, image=fallback_icon, values=(amount_formatted,))
+        icon = self.icons.get(category)
+        if not icon:
+            fallback_icon = ImageTk.PhotoImage(Image.open(os.path.join(icon_directory, "other.png")).resize((16, 16)).convert("RGB"))
+            self.image_refs.append(fallback_icon) 
+            icon = fallback_icon
+        
+        self.expense_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted,))
 
     def return_back(self):
         self.root.destroy()
