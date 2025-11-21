@@ -1,0 +1,11 @@
+.DS_Store
+.DS_Store?
+._*
+.pytest_cache/
+.env
+.env.local
+*.log
+*.pyc
+*.db
+__pycache__/
+
