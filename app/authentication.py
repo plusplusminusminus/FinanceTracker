@@ -13,7 +13,7 @@ class Authentication:
         try:
             user = self._user_crud.authenticate_user(email, password)
             if user:
-                return True, user, "Loging successful"
+                return True, user, "Login successful"
             else:
                 return False, None, "Invalid login credentials"
         except Exception as e:
@@ -21,7 +21,7 @@ class Authentication:
 
     def register(self, username: str, email: str, password: str, birthdate: date = None):
         if not username or not email or not password:
-            return False
+            return False, "Username, email, and password are required"
         # check to see if password is less than characters
         if (len(password) < 5):
             return False, "Password have to be longer than 5 characters"

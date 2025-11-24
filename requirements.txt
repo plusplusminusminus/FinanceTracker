@@ -3,4 +3,4 @@ bcrypt==4.1.1
 matplotlib==3.8.2
 pytest==7.4.3
 flake8==6.1.0
-
+pytest==9.0.1

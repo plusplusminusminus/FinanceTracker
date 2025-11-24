@@ -48,19 +48,27 @@ class InputTransactionWindow(MainWindow):
         self.selected_income_category = tk.StringVar(value=self.income_categories[0])
         tk.OptionMenu(self.income_frame, self.selected_income_category, *self.income_categories).pack(pady=6)
 
+        tk.Label(self.income_frame, text="Amount:").pack(anchor="w", padx=16, pady=(4, 2))
         self.income_entry = tk.Entry(self.income_frame, width=30)
         self.income_entry.pack(pady=4)
+        tk.Label(self.income_frame, text="Description (optional):").pack(anchor="w", padx=16, pady=(8, 2))
+        self.income_description_entry = tk.Entry(self.income_frame, width=30)
+        self.income_description_entry.pack(pady=4)
 
         tk.Button(self.income_frame, text="Submit Income", command=self.add_income).pack(pady=4)
 
-        self.income_tree = ttk.Treeview(self.income_frame, columns=("Amount"), show="tree headings", height=8)
+        self.income_tree = ttk.Treeview(self.income_frame, columns=("Amount", "Description"), show="tree headings", height=8)
         self.income_tree.pack(fill=tk.BOTH, expand=True, pady=8)
         self.income_tree.heading("#0", text="Category")
         self.income_tree.heading("Amount", text="Amount")
+        self.income_tree.heading("Description", text="Description")
+        self.income_tree.column("Amount", width=100)
+        self.income_tree.column("Description", width=200)
 
     def add_income(self):
         category = self.selected_income_category.get()
         amount_str = self.income_entry.get().strip()
+        description = self.income_description_entry.get().strip()
 
         if not amount_str:
             messagebox.showerror("Error", "Please enter an amount.")
@@ -97,17 +105,23 @@ class InputTransactionWindow(MainWindow):
             messagebox.showerror("Error", f"Category '{category}' not found.")
             return
 
-        self.income_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted,))
+
+        description_value = description if description else None
+        display_description = description if description else "No description"
+
+        self.income_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted, display_description))
 
         # Add the income that the user entered into the transaction database
         try:
             transaction = self.app.transactions.add_income(
                 user_id=current_user.id,
                 category_id=category_obj.id,
-                amount=amount
+                amount=amount,
+                description=description_value
             )
             messagebox.showinfo("Success", f"Added income: {category}, ${amount:.2f}")
             self.income_entry.delete(0, tk.END)
+            self.income_description_entry.delete(0, tk.END)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add income: {str(e)}")
 
@@ -119,21 +133,31 @@ class InputTransactionWindow(MainWindow):
         self.selected_expense_category = tk.StringVar(value=self.expense_categories[0])
         tk.OptionMenu(self.expense_frame, self.selected_expense_category, *self.expense_categories).pack(pady=6)
 
+        tk.Label(self.expense_frame, text="Amount:").pack(anchor="w", padx=16, pady=(4, 2))
         self.expense_entry = tk.Entry(self.expense_frame, width=30)
         self.expense_entry.pack(pady=4)
 
+
+        tk.Label(self.expense_frame, text="Description (optional):").pack(anchor="w", padx=16, pady=(8, 2))
+        self.expense_description_entry = tk.Entry(self.expense_frame, width=30)
+        self.expense_description_entry.pack(pady=4)
+
         tk.Button(self.expense_frame, text="Submit Expense", command=self.add_expense).pack(pady=4)
 
-        self.expense_tree = ttk.Treeview(self.expense_frame, columns=("Amount"), show="tree headings",
+        self.expense_tree = ttk.Treeview(self.expense_frame, columns=("Amount", "Description"), show="tree headings",
                                          height=8)  # Create the treeview
         self.expense_tree.pack(fill=tk.BOTH, expand=True, pady=8)
         self.expense_tree.heading("#0", text="Category")  # Use #0 for the first column (column ID)
         self.expense_tree.heading("Amount", text="Amount")
+        self.expense_tree.heading("Description", text="Description")
+        self.expense_tree.column("Amount", width=100)
+        self.expense_tree.column("Description", width=200)
 
     def add_expense(self):
         """Add an expense transaction for the user based on the details the entered."""
         category = self.selected_expense_category.get()
         amount_str = self.expense_entry.get().strip()
+        description = self.expense_description_entry.get().strip()
 
         if not amount_str:
             messagebox.showerror("Error", "Please enter an amount.")
@@ -171,17 +195,22 @@ class InputTransactionWindow(MainWindow):
             messagebox.showerror("Error", f"Category '{category}' not found.")
             return
 
-        self.expense_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted,))
+        description_value = description if description else None
+        display_description = description if description else "No description"
+
+        self.expense_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted, display_description))
 
         #Add the expense that the user entered into the transaction database
         try:
             transaction = self.app.transactions.add_expense(
                 user_id=current_user.id,
                 category_id=category_obj.id,
-                amount=amount
+                amount=amount,
+                description=description_value
             )
             messagebox.showinfo("Success", f"Added expense: {category}, ${amount:.2f}")
             self.expense_entry.delete(0, tk.END)
+            self.expense_description_entry.delete(0, tk.END)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add expense: {str(e)}")
 

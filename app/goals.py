@@ -10,12 +10,12 @@ class Goals:
     def create_goal(self, user_id: int, goal_description: str, goal_amount: float, current_amount: float = 0.0,
                     start_date: str = "", end_date: str = ""):
 
-        if not goal_description or not goal_amount:
+        if not goal_description or goal_amount is None:
             return False, "Goal description and goal amount are required"
         if goal_amount <= 0.0:
             return False, "Goal amount must be greater than 0"
-        if current_amount < 0.0:
-            return False, "Current amount must be greater than 0"
+        if current_amount is None or current_amount < 0.0:
+            return False, "Current amount must be greater than or equal to 0"
         if not start_date or not end_date:
             return False, "Start date and end date are required"
         try:

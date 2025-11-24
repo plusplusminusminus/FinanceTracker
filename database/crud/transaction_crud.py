@@ -8,15 +8,8 @@ class TransactionCrud:
     def __init__(self, db: Session):
         self._db = db
 
-    def create_transaction(self, user_id: int, category_id: int, amount: float, type: str,
-                        description: str = None) -> Transaction:
-        transaction = Transaction(
-            user_id=user_id,
-            category_id=category_id,
-            amount=amount,
-            type=type,
-            description=description
-        )
+    def create_transaction(self, user_id: int, category_id: int, amount: float, type: str,description: str = None) -> Transaction:
+        transaction = Transaction(user_id=user_id, category_id=category_id, amount=amount, type=type, description=description)
         self._db.add(transaction)
         self._db.commit()
         self._db.refresh(transaction)
@@ -121,8 +114,7 @@ class TransactionCrud:
 
     def get_transactions_by_category(self, user_id: int, transaction_type: str, start_date: datetime, end_date: datetime) -> dict:
         """Get the transactions by category based on the user id and the date range"""
-        # Get the total/sum amount of transaction for each category and label the column as "Total"
-        # Filter by user id and type of transaction such as "income" or "expense"
+        # get the total amount of transactions for each category and also filter it by the type of transaction for each user
         transaction_cats = self._db.query(
             Category.name,
             func.sum(Transaction.amount).label('Total')
@@ -132,10 +124,9 @@ class TransactionCrud:
             transaction_cats = transaction_cats.filter(Transaction.created_on >= start_date)
         if end_date:
             transaction_cats = transaction_cats.filter(Transaction.created_on <= end_date)
-        # Group all the transactions by the category name
+        #group the transactions categories by its name
         result = transaction_cats.group_by(Category.name)
 
-        # Stores the transaction sum for each categories into a dicitonary
         totals_per_categories = {}
         for category, total in result:
             totals_per_categories[category] = float(total)
@@ -176,11 +167,11 @@ class TransactionCrud:
         if not date:
             date = datetime.now(timezone.utc)
 
-        # Get the start of the week on Monday 00:00:00
+        #get the start of the week on Monday 00:00:00
         start_of_week = date - timedelta(days=date.weekday())
         start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # Get hte end of the week on Sunday 23:59:59
+        #get hte end of the week on Sunday 23:59:59
         end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
 
         return {
@@ -202,7 +193,7 @@ class TransactionCrud:
             year = now.year
             month = now.month
 
-        # Start of the month on the first day
+        #the first day of the month
         start_of_month = datetime(year, month, 1, tzinfo=timezone.utc)
 
         # End of the month on the last day
