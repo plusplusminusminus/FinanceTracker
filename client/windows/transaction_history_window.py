@@ -12,7 +12,9 @@ class TransactionHistoryWindow(MainWindow):
         """Initialize the transaction history window."""
         super().__init__(app)
         self.root.title("Transaction History Window")
-        self.root.geometry("900x650")
+        self.root.geometry("900x650") # Set the dimensions of the window
+
+        #self.center_window(self.root.winfo_width(), self.root.winfo_height())  # Center the window
 
         nav_bar = tk.Frame(self.root)
         nav_bar.pack(fill="x", pady=8)

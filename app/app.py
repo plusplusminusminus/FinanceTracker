@@ -1,3 +1,4 @@
+from app import transactions
 from database.db_config import SessionLocal, Base, engine
 from database.crud.category_crud import CategoryCrud
 from database.crud.user_crud import UserCrud
@@ -19,7 +20,7 @@ class FinanceApp:
         self._user_crud = UserCrud(self._db)
         self._transactions = Transactions(self._db)
         self._category_crud = CategoryCrud(self._db)
-
+        self._user = None
         self.main_window = LoginWindow(self)
 
     def _initialize_database(self):
@@ -34,6 +35,15 @@ class FinanceApp:
             session.rollback()
         finally:
             session.close()
+
+    def get_daily_report_data(self):
+        return self._transactions.get_daily_report_data(self._user.id)
+
+    def get_weekly_report_data(self):
+        return self._transactions.get_weekly_report_data(self._user.id)
+
+    def get_monthly_report_data(self):
+        return self._transactions.get_monthly_report_data(self._user.id)
 
     @property
     def session_manager(self):
@@ -60,6 +70,7 @@ class FinanceApp:
         if user:
             print(user.username)
             self._session_manager.login(user)
+            self._user = user # Saving a reference to the user
             return user
         else:
             print("Invalid credentials")

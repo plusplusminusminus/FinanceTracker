@@ -9,8 +9,9 @@ class GoalsWindow(MainWindow):
     """Window GUI and functions for creating and managing financial goals."""
     def __init__(self, app):
         super().__init__(app)
-        self.root.title("Goals Window")
+        # self.root.title("Goals Window")
         self.root.geometry("950x950")
+        #self.center_window(self.root.winfo_width(), self.root.winfo_height())  # Center the window
 
         # navigation bar to go back to dashboard
         nav_bar = tk.Frame(self.root)

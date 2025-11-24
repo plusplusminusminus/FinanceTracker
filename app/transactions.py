@@ -34,6 +34,15 @@ class Transactions:
     def get_income_by_category(self, user_id: int, start_date: datetime = None, end_date: datetime = None):
         return self._transaction_crud.get_income_by_category(user_id, start_date, end_date)
 
+    def get_daily_report_data(self, user_id: int, date: datetime = None):
+        return self._transaction_crud.get_daily_report(user_id, date)
+
+    def get_weekly_report_data(self, user_id: int, date: datetime = None):
+        return self._transaction_crud.get_weekly_report(user_id, date)
+
+    def get_monthly_report_data(self, user_id: int, start_date: datetime = None, end_date: datetime = None):
+        return self._transaction_crud.get_monthly_report(user_id, start_date, end_date)
+
     def delete_user_transaction(self, user_id, transaction_id):
         try:
             deleted = self._transaction_crud.delete_transaction(user_id, transaction_id)
@@ -42,6 +51,7 @@ class Transactions:
             return True, "Deleted transaction successfully"
         except Exception as e:
             return False, f"Error deleting transaction: {e}"
+
     # for debugging
     def print_all_transactions(self, user_id: int):
         txs = self.get_user_transactions(user_id)

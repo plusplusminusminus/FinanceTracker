@@ -8,8 +8,11 @@ class AccountWindow(MainWindow):
     def __init__(self, app):
         """Initialize the account window."""
         super().__init__(app)
+
         self.root.title("Account Details Window")
         self.root.geometry("400x400")
+
+        #self.center_window(self.root.winfo_width(), self.root.winfo_height()) # Center the window
 
         self.account_details_frame = tk.LabelFrame(self.root, text="ACCOUNT DETAILS")
         self.account_details_frame.pack(fill="x", padx=16, pady=8)
