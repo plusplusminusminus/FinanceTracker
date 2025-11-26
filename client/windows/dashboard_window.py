@@ -1,8 +1,8 @@
 """Dashboard window for navigating to other windows and viewing visual reports"""
 import tkinter as tk
-from idlelib.debugger_r import frametable
 from tkinter import ttk
 
+from fontTools.varLib.mutator import percents
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -29,6 +29,12 @@ class DashboardWindow(MainWindow):
         tk.Button(nav_bar, text="Goals", command=self.open_goals).pack(side="left", padx=6)
         tk.Button(nav_bar, text="Account", command=self.open_account).pack(side="left", padx=6)
         tk.Button(nav_bar, text="Sign Out", command=self.sign_out).pack(side="right", padx=6)
+
+        self.fig = Figure(figsize=(5, 5), dpi=100)
+        self.ax = self.fig.add_subplot(1, 1, 1)
+
+        self.canvas = FigureCanvasTkAgg(self.fig, self.root)
+        self.canvas.get_tk_widget().pack()
 
         self.display_summary()
 
@@ -62,32 +68,110 @@ class DashboardWindow(MainWindow):
         self.root.destroy()
         AccountWindow(self.app)
 
-    def display_summary(self):
-        """Display the charts.""" """ Pie charts showing expenses and income by category """
+    def update_graph(self):
+        """Update the graph."""
+        if self.selected_time_frame.get() == "daily":
+            incomes = self.daily_report_data["income_by_category"]
+            expenses = self.daily_report_data["expenses_by_category"]
+        elif self.selected_time_frame.get() == "weekly":
+            incomes = self.weekly_report_data["income_by_category"]
+            expenses = self.weekly_report_data["expenses_by_category"]
+        elif self.selected_time_frame.get() == "monthly":
+            incomes = self.monthly_report_data["income_by_category"]
+            expenses = self.monthly_report_data["expenses_by_category"]
 
-        expenses = self.monthly_report_data["expenses_by_category"]
         categories = []
         amounts = []
+
+        final_categories = []
+        final_sizes = []
         sizes = []
+        other = 0
+        other_cutoff = 5
+
 
         for category, amount in expenses.items():
             categories.append(category)
             amounts.append(amount)
 
         for i in range(len(categories)):
-            sizes.append(amounts[i] * 100 / sum(amounts))
+            percents = amounts[i] * 100 / sum(amounts)
 
-        fig = Figure(figsize=(3, 3), dpi=100)
-        ax = fig.add_subplot(1, 1, 1)
+            if percents > other_cutoff:
+                final_categories.append(categories[i])
+                final_sizes.append(amounts[i])
+            else:
+                other += amounts[i]
 
-        ax.pie(sizes, labels=categories, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
+        if other > 0:
+            final_categories.append("other")
+            final_sizes.append(other)
 
-        ax.axis("equal")
-        fig.tight_layout()
+        self.ax.clear()
 
-        canvas = FigureCanvasTkAgg(fig, self.root)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
+        self.ax.pie(final_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
+
+        self.ax.axis("equal")
+        self.ax.legend(final_categories, loc="upper right")
+        self.fig.tight_layout()
+        self.canvas.draw()
+
+    def display_summary(self):
+        """Display the charts.""" """ Pie charts showing expenses and income by category """
+        self.time_frame = ["daily", "weekly", "monthly"]
+
+        self.selected_time_frame = tk.StringVar(value=self.time_frame[2])
+        tk.OptionMenu(self.root, self.selected_time_frame, *self.time_frame).pack(pady=6)
+        self.selected_time_frame.trace_add("write", lambda *args: self.update_graph())
+        self.update_graph()
+        # tk.Button(self.root, text="test", command=update_graph)
+        # if self.selected_time_frame.get() == "daily":
+        #     incomes = self.daily_report_data["income_by_category"]
+        #     expenses = self.daily_report_data["expenses_by_category"]
+        # elif self.selected_time_frame.get() == "weekly":
+        #     incomes = self.weekly_report_data["income_by_category"]
+        #     expenses = self.weekly_report_data["expenses_by_category"]
+        # elif self.selected_time_frame.get() == "monthly":
+        #     incomes = self.monthly_report_data["income_by_category"]
+        #     expenses = self.monthly_report_data["expenses_by_category"]
+        #
+        # categories = []
+        # final_categories = []
+        # final_sizes = []
+        # amounts = []
+        # sizes = []
+        # other = 0
+        # other_cutoff = 5
+        #
+        # for category, amount in expenses.items():
+        #     categories.append(category)
+        #     amounts.append(amount)
+        #
+        # for i in range(len(categories)):
+        #     percents = amounts[i] * 100 / sum(amounts)
+        #
+        #     if percents > other_cutoff:
+        #         final_categories.append(categories[i])
+        #         final_sizes.append(amounts[i])
+        #     else:
+        #         other += amounts[i]
+        #
+        # if other > 0:
+        #     final_categories.append("other")
+        #     final_sizes.append(other)
+        #
+        # fig = Figure(figsize=(5, 5), dpi=100)
+        # ax = fig.add_subplot(1, 1, 1)
+        #
+        # ax.pie(final_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
+        #
+        # ax.axis("equal")
+        # ax.legend(final_categories, loc="upper right")
+        # fig.tight_layout()
+        #
+        # canvas = FigureCanvasTkAgg(fig, self.root)
+        # canvas.draw()
+        # canvas.get_tk_widget().pack()
 
     def sign_out(self):
         """Sign out and return to login window."""
@@ -96,3 +180,13 @@ class DashboardWindow(MainWindow):
         self.app.session_manager.logout()
         self.root.destroy()
         LoginWindow(self.app)
+
+"""
+bar chart with total income and total expenses
+
+two bar charts (total income and total expenses) # like the male and female example in lecture
+
+function for getting all of the income and expenses
+
+same thing showing for daily, weekly, and monthly
+"""

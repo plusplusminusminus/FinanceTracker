@@ -189,7 +189,7 @@ class TransactionCrud:
             "income": self.get_total_income(user_id, start_of_week, end_of_week),
             "expenses": self.get_total_expenses(user_id, start_of_week, end_of_week),
             "net_balance": self.get_net_balance(user_id, start_of_week, end_of_week),
-            "expense_by_category": self.get_expense_by_category(user_id, start_of_week, end_of_week),
+            "expenses_by_category": self.get_expense_by_category(user_id, start_of_week, end_of_week),
             "income_by_category": self.get_income_by_category(user_id, start_of_week, end_of_week)
 
         }
