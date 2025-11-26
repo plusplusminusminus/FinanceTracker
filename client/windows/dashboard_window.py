@@ -79,21 +79,32 @@ class DashboardWindow(MainWindow):
         elif self.selected_time_frame.get() == "monthly":
             incomes = self.monthly_report_data["income_by_category"]
             expenses = self.monthly_report_data["expenses_by_category"]
+        else:
+            raise RuntimeError("Invalid selection")
 
+        final_expense_categories, final_expense_sizes = self.create_chart_data(expenses)
+        # final_income_categories, final_income_sizes = self.create_chart_data(incomes)
+
+        self.ax.clear()
+
+        self.ax.pie(final_expense_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
+
+        self.ax.axis("equal")
+        self.ax.legend(final_expense_categories, loc="upper right")
+        self.fig.tight_layout()
+        self.canvas.draw()
+
+    def create_chart_data(self, expenses):
         categories = []
         amounts = []
-
         final_categories = []
         final_sizes = []
         sizes = []
         other = 0
         other_cutoff = 5
-
-
         for category, amount in expenses.items():
             categories.append(category)
             amounts.append(amount)
-
         for i in range(len(categories)):
             percents = amounts[i] * 100 / sum(amounts)
 
@@ -102,19 +113,10 @@ class DashboardWindow(MainWindow):
                 final_sizes.append(amounts[i])
             else:
                 other += amounts[i]
-
         if other > 0:
             final_categories.append("other")
             final_sizes.append(other)
-
-        self.ax.clear()
-
-        self.ax.pie(final_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
-
-        self.ax.axis("equal")
-        self.ax.legend(final_categories, loc="upper right")
-        self.fig.tight_layout()
-        self.canvas.draw()
+        return final_categories, final_sizes
 
     def display_summary(self):
         """Display the charts.""" """ Pie charts showing expenses and income by category """
