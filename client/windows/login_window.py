@@ -11,8 +11,6 @@ class LoginWindow(MainWindow):
         self.root.title("Login Window")
         self.root.geometry("400x400")
 
-        #self.center_window(self.root.winfo_width(), self.root.winfo_height())  # Center the window
-
         # Email label + entry
         tk.Label(self.root, text="Email").pack(anchor="w", padx=16, pady=(16, 2))
         self.email_value = tk.StringVar()

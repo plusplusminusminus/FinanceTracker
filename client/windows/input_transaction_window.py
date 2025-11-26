@@ -13,8 +13,6 @@ class InputTransactionWindow(MainWindow):
         self.root.title("Input Expenses & Income")
         self.root.geometry("600x500")
 
-        #self.center_window(self.root.winfo_width(), self.root.winfo_height())  # Center the window
-
         self.image_refs = []
 
         self.icons = {}

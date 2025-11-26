@@ -2,14 +2,15 @@
 import tkinter as tk
 from tkinter import ttk
 
-from fontTools.varLib.mutator import percents
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.pyplot import figure
-from sqlalchemy.testing.provision import temp_table_keyword_args
 
 from .base_window import MainWindow
+from .input_transaction_window import InputTransactionWindow
+from .transaction_history_window import TransactionHistoryWindow
+from .goals_window import GoalsWindow
+from .account_window import AccountWindow
+from .login_window import LoginWindow
 
 class DashboardWindow(MainWindow):
     """Main dashboard window with navigation and visual reports."""
@@ -19,9 +20,7 @@ class DashboardWindow(MainWindow):
         self.weekly_report_data = app.get_weekly_report_data()
         self.monthly_report_data = app.get_monthly_report_data()
         self.root.title("Dashboard Window")
-        self.root.geometry("400x400")
-        #self.center_window(self.root.winfo_width(), self.root.winfo_height()) # Center the window
-
+        self.root.geometry("700x700")
         nav_bar = tk.Frame(self.root)
         nav_bar.pack(fill="x", pady=10)
         tk.Button(nav_bar, text="Input Transactions", command=self.open_input_transaction).pack(side="left", padx=6)
@@ -29,42 +28,26 @@ class DashboardWindow(MainWindow):
         tk.Button(nav_bar, text="Goals", command=self.open_goals).pack(side="left", padx=6)
         tk.Button(nav_bar, text="Account", command=self.open_account).pack(side="left", padx=6)
         tk.Button(nav_bar, text="Sign Out", command=self.sign_out).pack(side="right", padx=6)
-
-        self.fig = Figure(figsize=(5, 5), dpi=100)
-        self.ax = self.fig.add_subplot(1, 1, 1)
-
-        self.canvas = FigureCanvasTkAgg(self.fig, self.root)
-        self.canvas.get_tk_widget().pack()
-
         self.display_summary()
-
         self.root.mainloop()
 
     def open_input_transaction(self):
         """Open the input transaction window."""
-        from .input_transaction_window import InputTransactionWindow
-        
         self.root.destroy()
         InputTransactionWindow(self.app)
 
     def open_transaction_history(self):
         """Open the transaction history window."""
-        from .transaction_history_window import TransactionHistoryWindow
-        
         self.root.destroy()
         TransactionHistoryWindow(self.app)
 
     def open_goals(self):
         """Open the goals window."""
-        from .goals_window import GoalsWindow
-        
         self.root.destroy()
         GoalsWindow(self.app)
 
     def open_account(self):
         """Open the account window."""
-        from .account_window import AccountWindow
-        
         self.root.destroy()
         AccountWindow(self.app)
 
@@ -83,112 +66,63 @@ class DashboardWindow(MainWindow):
             raise RuntimeError("Invalid selection")
 
         final_expense_categories, final_expense_sizes = self.create_chart_data(expenses)
-        # final_income_categories, final_income_sizes = self.create_chart_data(incomes)
+        final_income_categories, final_income_sizes = self.create_chart_data(incomes)
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill="both", expand=True)
+        tab1 = ttk.Frame(notebook)
+        tab2 = ttk.Frame(notebook)
+        notebook.add(tab1, text="Expenses")
+        notebook.add(tab2, text="Incomes")
+        self.create_pie_and_bar_charts(tab1, final_expense_sizes, final_expense_categories)
+        self.create_pie_and_bar_charts(tab2, final_income_sizes, final_income_categories)
 
-        self.ax.clear()
+    def create_pie_and_bar_charts(self, parent, data, labels):
+        for child in parent.winfo_children():
+            child.destroy()
 
-        self.ax.pie(final_expense_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
-
-        self.ax.axis("equal")
-        self.ax.legend(final_expense_categories, loc="upper right")
-        self.fig.tight_layout()
+        fig = Figure(figsize=(5, 5), dpi=100)
+        axes = fig.subplots(1, 2)
+        ax_pie = axes[0]
+        ax_bar_chart = axes[1]
+        ax_pie.pie(data, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
+        ax_pie.legend(labels, loc='upper right')
+        ax_pie.axis('equal')
+        ax_bar_chart.bar(labels, data)
+        fig.tight_layout()
+        self.canvas = FigureCanvasTkAgg(fig, parent)
+        self.canvas.get_tk_widget().pack()
         self.canvas.draw()
 
-    def create_chart_data(self, expenses):
-        categories = []
-        amounts = []
+    def create_chart_data(self, data):
         final_categories = []
         final_sizes = []
-        sizes = []
         other = 0
         other_cutoff = 5
-        for category, amount in expenses.items():
-            categories.append(category)
-            amounts.append(amount)
-        for i in range(len(categories)):
-            percents = amounts[i] * 100 / sum(amounts)
+        amount_sum = sum(data.values())
 
+        for category, amount in data.items():
+            percents = amount * 100 / amount_sum
             if percents > other_cutoff:
-                final_categories.append(categories[i])
-                final_sizes.append(amounts[i])
+                final_categories.append(category)
+                final_sizes.append(amount)
             else:
-                other += amounts[i]
+                other += amount
         if other > 0:
-            final_categories.append("other")
+            final_categories.append("Other")
             final_sizes.append(other)
+
         return final_categories, final_sizes
 
     def display_summary(self):
-        """Display the charts.""" """ Pie charts showing expenses and income by category """
+        """Display the charts."""
         self.time_frame = ["daily", "weekly", "monthly"]
-
         self.selected_time_frame = tk.StringVar(value=self.time_frame[2])
         tk.OptionMenu(self.root, self.selected_time_frame, *self.time_frame).pack(pady=6)
         self.selected_time_frame.trace_add("write", lambda *args: self.update_graph())
         self.update_graph()
-        # tk.Button(self.root, text="test", command=update_graph)
-        # if self.selected_time_frame.get() == "daily":
-        #     incomes = self.daily_report_data["income_by_category"]
-        #     expenses = self.daily_report_data["expenses_by_category"]
-        # elif self.selected_time_frame.get() == "weekly":
-        #     incomes = self.weekly_report_data["income_by_category"]
-        #     expenses = self.weekly_report_data["expenses_by_category"]
-        # elif self.selected_time_frame.get() == "monthly":
-        #     incomes = self.monthly_report_data["income_by_category"]
-        #     expenses = self.monthly_report_data["expenses_by_category"]
-        #
-        # categories = []
-        # final_categories = []
-        # final_sizes = []
-        # amounts = []
-        # sizes = []
-        # other = 0
-        # other_cutoff = 5
-        #
-        # for category, amount in expenses.items():
-        #     categories.append(category)
-        #     amounts.append(amount)
-        #
-        # for i in range(len(categories)):
-        #     percents = amounts[i] * 100 / sum(amounts)
-        #
-        #     if percents > other_cutoff:
-        #         final_categories.append(categories[i])
-        #         final_sizes.append(amounts[i])
-        #     else:
-        #         other += amounts[i]
-        #
-        # if other > 0:
-        #     final_categories.append("other")
-        #     final_sizes.append(other)
-        #
-        # fig = Figure(figsize=(5, 5), dpi=100)
-        # ax = fig.add_subplot(1, 1, 1)
-        #
-        # ax.pie(final_sizes, labels=None, autopct='%1.1f%%', startangle=140, pctdistance=0.5, labeldistance=1.5)
-        #
-        # ax.axis("equal")
-        # ax.legend(final_categories, loc="upper right")
-        # fig.tight_layout()
-        #
-        # canvas = FigureCanvasTkAgg(fig, self.root)
-        # canvas.draw()
-        # canvas.get_tk_widget().pack()
 
     def sign_out(self):
         """Sign out and return to login window."""
-        from .login_window import LoginWindow
-        
         self.app.session_manager.logout()
         self.root.destroy()
         LoginWindow(self.app)
-
-"""
-bar chart with total income and total expenses
-
-two bar charts (total income and total expenses) # like the male and female example in lecture
-
-function for getting all of the income and expenses
-
-same thing showing for daily, weekly, and monthly
-"""

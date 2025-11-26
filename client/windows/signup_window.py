@@ -13,8 +13,6 @@ class SignUpWindow(MainWindow):
         self.root.title("Sign Up Window")
         self.root.geometry("400x400")
 
-        #self.center_window(self.root.winfo_width(), self.root.winfo_height())  # Center the window
-
         self.username_value = tk.StringVar()
         self.email_value = tk.StringVar()
         self.password_value = tk.StringVar()
