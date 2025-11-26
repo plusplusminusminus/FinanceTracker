@@ -77,6 +77,7 @@ class DashboardWindow(MainWindow):
         self.create_pie_and_bar_charts(tab2, final_income_sizes, final_income_categories)
 
     def create_pie_and_bar_charts(self, parent, data, labels):
+        """Create the pie-and-bar charts."""
         for child in parent.winfo_children():
             child.destroy()
 
@@ -94,6 +95,7 @@ class DashboardWindow(MainWindow):
         self.canvas.draw()
 
     def create_chart_data(self, data):
+        """Create the chart data."""
         final_categories = []
         final_sizes = []
         other = 0
