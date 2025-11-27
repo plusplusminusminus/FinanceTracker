@@ -227,7 +227,7 @@ class TestTransactionCrud:
         assert isinstance(weekly_report["income"], float)
         assert isinstance(weekly_report["expenses"], float)
         assert isinstance(weekly_report["net_balance"], float)
-        assert isinstance(weekly_report["expense_by_category"], dict)
+        assert isinstance(weekly_report["expenses_by_category"], dict)
         assert isinstance(weekly_report["income_by_category"], dict)
     
     def test_get_monthly_report(self, test_user, test_income_transaction, test_expense_transaction, transaction_crud):
