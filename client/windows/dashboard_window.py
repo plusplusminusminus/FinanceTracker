@@ -83,6 +83,7 @@ class DashboardWindow(MainWindow):
         ax_pie.legend(labels, loc='upper right')
         ax_pie.axis('equal')
         ax_bar_chart.bar(labels, data)
+        ax_bar_chart.tick_params(axis='x', rotation=45)
         fig.tight_layout()
         canvas = FigureCanvasTkAgg(fig, parent)
         canvas.get_tk_widget().pack()
