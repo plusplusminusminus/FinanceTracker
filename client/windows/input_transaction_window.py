@@ -12,6 +12,7 @@ class InputTransactionWindow(MainWindow):
         super().__init__(app)
         self.root.title("Input Expenses & Income")
         self.root.geometry("600x500")
+
         self.image_refs = []
 
         self.icons = {}

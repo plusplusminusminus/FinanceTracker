@@ -8,6 +8,7 @@ class AccountWindow(MainWindow):
     def __init__(self, app):
         """Initialize the account window."""
         super().__init__(app)
+
         self.root.title("Account Details Window")
         self.root.geometry("400x400")
 
