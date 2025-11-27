@@ -67,14 +67,8 @@ class DashboardWindow(MainWindow):
 
         final_expense_categories, final_expense_sizes = self.create_chart_data(expenses)
         final_income_categories, final_income_sizes = self.create_chart_data(incomes)
-        notebook = ttk.Notebook(self.root)
-        notebook.pack(fill="both", expand=True)
-        tab1 = ttk.Frame(notebook)
-        tab2 = ttk.Frame(notebook)
-        notebook.add(tab1, text="Expenses")
-        notebook.add(tab2, text="Incomes")
-        self.create_pie_and_bar_charts(tab1, final_expense_sizes, final_expense_categories)
-        self.create_pie_and_bar_charts(tab2, final_income_sizes, final_income_categories)
+        self.create_pie_and_bar_charts(self.expense_tab, final_expense_sizes, final_expense_categories)
+        self.create_pie_and_bar_charts(self.income_tab, final_income_sizes, final_income_categories)
 
     def create_pie_and_bar_charts(self, parent, data, labels):
         """Create the pie-and-bar charts."""
@@ -90,9 +84,9 @@ class DashboardWindow(MainWindow):
         ax_pie.axis('equal')
         ax_bar_chart.bar(labels, data)
         fig.tight_layout()
-        self.canvas = FigureCanvasTkAgg(fig, parent)
-        self.canvas.get_tk_widget().pack()
-        self.canvas.draw()
+        canvas = FigureCanvasTkAgg(fig, parent)
+        canvas.get_tk_widget().pack()
+        canvas.draw()
 
     def create_chart_data(self, data):
         """Create the chart data."""
@@ -120,6 +114,12 @@ class DashboardWindow(MainWindow):
         self.time_frame = ["daily", "weekly", "monthly"]
         self.selected_time_frame = tk.StringVar(value=self.time_frame[2])
         tk.OptionMenu(self.root, self.selected_time_frame, *self.time_frame).pack(pady=6)
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill="both", expand=True)
+        self.expense_tab = ttk.Frame(self.notebook)
+        self.income_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.expense_tab, text="Expenses")
+        self.notebook.add(self.income_tab, text="Incomes")
         self.selected_time_frame.trace_add("write", lambda *args: self.update_graph())
         self.update_graph()
 
