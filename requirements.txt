@@ -1,5 +1,4 @@
 sqlalchemy==2.0.23
 bcrypt==4.1.1
 matplotlib==3.8.2
-pytest==7.4.3
 pytest==9.0.1
