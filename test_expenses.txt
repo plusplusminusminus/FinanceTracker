@@ -1,6 +1,0 @@
-Shopping, -50.00
-Credit Card Payment, -65.00
-Transport, -20.00
-Salary, 550.00
-Transport, -220.00
-Salary, 500.00
