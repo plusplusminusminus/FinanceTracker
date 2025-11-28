@@ -3,13 +3,13 @@ import tkinter as tk
 from tkinter import messagebox
 from .base_window import MainWindow
 
-
 class LoginWindow(MainWindow):
     """Window GUI and functions for user login."""
     def __init__(self, app):
         super().__init__(app)
         self.root.title("Login Window")
         self.root.geometry("400x400")
+        self.center_window(900, 900)
 
         # Email label + entry
         tk.Label(self.root, text="Email").pack(anchor="w", padx=16, pady=(16, 2))

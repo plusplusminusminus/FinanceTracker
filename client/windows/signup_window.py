@@ -4,7 +4,6 @@ from tkinter import messagebox
 from datetime import datetime
 from .base_window import MainWindow
 
-
 class SignUpWindow(MainWindow):
     """Window GUI and functions for user sign up."""
     def __init__(self, app):
@@ -12,6 +11,7 @@ class SignUpWindow(MainWindow):
         super().__init__(app)
         self.root.title("Sign Up Window")
         self.root.geometry("400x400")
+        self.center_window(900, 900)
 
         self.username_value = tk.StringVar()
         self.email_value = tk.StringVar()

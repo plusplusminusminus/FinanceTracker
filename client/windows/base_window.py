@@ -1,7 +1,6 @@
 """Base window class for the rest of the windows."""
 import tkinter as tk
 
-
 class MainWindow:
     """Base class for the rest of the windows."""
     def __init__(self, app):

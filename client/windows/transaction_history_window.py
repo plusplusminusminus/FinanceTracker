@@ -12,7 +12,8 @@ class TransactionHistoryWindow(MainWindow):
         """Initialize the transaction history window."""
         super().__init__(app)
         self.root.title("Transaction History Window")
-        self.root.geometry("900x650") # Set the dimensions of the window
+        self.root.geometry("900x650")
+        self.center_window(900, 900)
 
         nav_bar = tk.Frame(self.root)
         nav_bar.pack(fill="x", pady=8)
@@ -20,8 +21,8 @@ class TransactionHistoryWindow(MainWindow):
 
         self.transaction_history_frame = tk.LabelFrame(self.root, text="TRANSACTION HISTORY")
         self.transaction_history_frame.pack(fill="both", expand=True, padx=16, pady=8)
-        # frame for the tree view of the list of transactions
 
+        # frame for the tree view of the list of transactions
         self.all_categories = sorted(set(INCOME_CATEGORIES + EXPENSE_CATEGORIES))
         self.income_categories = list(INCOME_CATEGORIES)
         self.expense_categories = list(EXPENSE_CATEGORIES)

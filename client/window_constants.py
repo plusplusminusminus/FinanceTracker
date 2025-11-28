@@ -29,7 +29,6 @@ EXPENSE_CATEGORIES = [
     "Gift", "Other"
 ]
 
-
 def load_icon(category):
     """Load an icon from the icons dictionary that corresponds to the category."""
     path = os.path.join(icon_directory, icon_dictionary[category])

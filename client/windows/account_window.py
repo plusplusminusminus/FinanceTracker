@@ -2,7 +2,6 @@
 import tkinter as tk
 from .base_window import MainWindow
 
-
 class AccountWindow(MainWindow):
     """Window GUI and functions for viewing account details."""
     def __init__(self, app):
@@ -11,6 +10,7 @@ class AccountWindow(MainWindow):
 
         self.root.title("Account Details Window")
         self.root.geometry("400x400")
+        self.center_window(900, 900)
 
         self.account_details_frame = tk.LabelFrame(self.root, text="ACCOUNT DETAILS")
         self.account_details_frame.pack(fill="x", padx=16, pady=8)

@@ -21,6 +21,7 @@ class DashboardWindow(MainWindow):
         self.monthly_report_data = app.get_monthly_report_data()
         self.root.title("Dashboard Window")
         self.root.geometry("700x700")
+        self.center_window( 900, 900)
         nav_bar = tk.Frame(self.root)
         nav_bar.pack(fill="x", pady=10)
         tk.Button(nav_bar, text="Input Transactions", command=self.open_input_transaction).pack(side="left", padx=6)
@@ -72,10 +73,12 @@ class DashboardWindow(MainWindow):
 
     def create_pie_and_bar_charts(self, parent, data, labels):
         """Create the pie-and-bar charts."""
+
+        # Remove any existing charts in the tab before drawing new ones
         for child in parent.winfo_children():
             child.destroy()
 
-        fig = Figure(figsize=(5, 5), dpi=100)
+        fig = Figure(figsize=(8, 8), dpi=100)
         axes = fig.subplots(1, 2)
         ax_pie = axes[0]
         ax_bar_chart = axes[1]
@@ -94,7 +97,7 @@ class DashboardWindow(MainWindow):
         final_categories = []
         final_sizes = []
         other = 0
-        other_cutoff = 5
+        other_cutoff = 5 # Categories under 5% get grouped into "Other"
         amount_sum = sum(data.values())
 
         for category, amount in data.items():

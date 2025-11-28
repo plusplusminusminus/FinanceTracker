@@ -12,9 +12,8 @@ class InputTransactionWindow(MainWindow):
         super().__init__(app)
         self.root.title("Input Expenses & Income")
         self.root.geometry("600x500")
-
+        self.center_window(900, 900)
         self.image_refs = []
-
         self.icons = {}
         for category, filename in icon_dictionary.items():
             try:
@@ -32,32 +31,25 @@ class InputTransactionWindow(MainWindow):
         # Create tabbed interface
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(expand=True, fill="both")
-
         self.create_income_tab()
         self.create_expense_tab()
-
         self.notebook.add(self.income_frame, text="Income")
         self.notebook.add(self.expense_frame, text="Expenses")
-
         self.root.mainloop()
 
     def create_income_tab(self):
         """Create the income input tab for the user to input their income."""
         self.income_frame = tk.Frame(self.notebook)
         self.income_categories = list(INCOME_CATEGORIES)
-
         self.selected_income_category = tk.StringVar(value=self.income_categories[0])
         tk.OptionMenu(self.income_frame, self.selected_income_category, *self.income_categories).pack(pady=6)
-
         tk.Label(self.income_frame, text="Amount:").pack(anchor="w", padx=16, pady=(4, 2))
         self.income_entry = tk.Entry(self.income_frame, width=30)
         self.income_entry.pack(pady=4)
         tk.Label(self.income_frame, text="Description (optional):").pack(anchor="w", padx=16, pady=(8, 2))
         self.income_description_entry = tk.Entry(self.income_frame, width=30)
         self.income_description_entry.pack(pady=4)
-
         tk.Button(self.income_frame, text="Submit Income", command=self.add_income).pack(pady=4)
-
         self.income_tree = ttk.Treeview(self.income_frame, columns=("Amount", "Description"), show="tree headings", height=8)
         self.income_tree.pack(fill=tk.BOTH, expand=True, pady=8)
         self.income_tree.heading("#0", text="Category")
@@ -89,27 +81,28 @@ class InputTransactionWindow(MainWindow):
 
         # Get icon for category or use the fallback icon if the category icon is not found
         icon = self.icons.get(category)
+
         if not icon:
-            #initialziet he fallback icon if the category icon is not found and add it to the image refernces
+            #initialize the fallback icon if the category icon is not found and add it to the image references
             fallback_icon = ImageTk.PhotoImage(Image.open(os.path.join(icon_directory, "other.png")).resize((16, 16)).convert("RGB"))
             self.image_refs.append(fallback_icon)
             icon = fallback_icon
 
         current_user = self.app.session_manager.current_user
+
         if not current_user:
             messagebox.showerror("Error", "Need to be logged in to add transactions.")
             return
 
         # Get the category that the income is under so we can have a relationship where each transaction has a category
         category_obj = self.app.category_crud.get_category_by_name(category)
+
         if not category_obj:
             messagebox.showerror("Error", f"Category '{category}' not found.")
             return
 
-
         description_value = description if description else None
         display_description = description if description else "No description"
-
         self.income_tree.insert("", tk.END, text=category, image=icon, values=(amount_formatted, display_description))
 
         # Add the income that the user entered into the transaction database
@@ -130,21 +123,15 @@ class InputTransactionWindow(MainWindow):
         """Create the expense input tab for the user to input their expenses."""
         self.expense_frame = tk.Frame(self.notebook)
         self.expense_categories = list(EXPENSE_CATEGORIES)
-
         self.selected_expense_category = tk.StringVar(value=self.expense_categories[0])
         tk.OptionMenu(self.expense_frame, self.selected_expense_category, *self.expense_categories).pack(pady=6)
-
         tk.Label(self.expense_frame, text="Amount:").pack(anchor="w", padx=16, pady=(4, 2))
         self.expense_entry = tk.Entry(self.expense_frame, width=30)
         self.expense_entry.pack(pady=4)
-
-
         tk.Label(self.expense_frame, text="Description (optional):").pack(anchor="w", padx=16, pady=(8, 2))
         self.expense_description_entry = tk.Entry(self.expense_frame, width=30)
         self.expense_description_entry.pack(pady=4)
-
         tk.Button(self.expense_frame, text="Submit Expense", command=self.add_expense).pack(pady=4)
-
         self.expense_tree = ttk.Treeview(self.expense_frame, columns=("Amount", "Description"), show="tree headings",
                                          height=8)  # Create the treeview
         self.expense_tree.pack(fill=tk.BOTH, expand=True, pady=8)
@@ -176,22 +163,25 @@ class InputTransactionWindow(MainWindow):
 
         amount_formatted = f"{amount:.2f}"
 
-        # Get icon for category or use the fallback icon if the category icon is not found
+        # Get the icon for category or use the fallback icon if the category icon is not found
         icon = self.icons.get(category)
+
         if not icon:
-            # initialziet he fallback icon if the category icon is not found and add it to the image refernces
+            # Initialize the fallback icon if the category icon is not found and add it to the image references
             fallback_icon = ImageTk.PhotoImage(
                 Image.open(os.path.join(icon_directory, "other.png")).resize((16, 16)).convert("RGB"))
             self.image_refs.append(fallback_icon)
             icon = fallback_icon
 
         current_user = self.app.session_manager.current_user
+
         if not current_user:
             messagebox.showerror("Error", "Need to be logged in to add transactions.")
             return
 
         #Get the category that the expense is under so we can have a relationship where each transaction has a category
         category_obj = self.app.category_crud.get_category_by_name(category)
+
         if not category_obj:
             messagebox.showerror("Error", f"Category '{category}' not found.")
             return
