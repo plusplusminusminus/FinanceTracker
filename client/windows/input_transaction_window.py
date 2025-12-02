@@ -209,6 +209,6 @@ class InputTransactionWindow(MainWindow):
         """Return to the dashboard window."""
         from .dashboard_window import DashboardWindow
         
-        self.root.destroy()
+        self.close_window()
         DashboardWindow(self.app)
 

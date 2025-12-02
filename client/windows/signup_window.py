@@ -57,6 +57,6 @@ class SignUpWindow(MainWindow):
         """Return to the login window."""
         from .login_window import LoginWindow
         
-        self.root.destroy()
+        self.close_window()
         LoginWindow(self.app)
 

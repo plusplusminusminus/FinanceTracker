@@ -34,22 +34,22 @@ class DashboardWindow(MainWindow):
 
     def open_input_transaction(self):
         """Open the input transaction window."""
-        self.root.destroy()
+        self.close_window()
         InputTransactionWindow(self.app)
 
     def open_transaction_history(self):
         """Open the transaction history window."""
-        self.root.destroy()
+        self.close_window()
         TransactionHistoryWindow(self.app)
 
     def open_goals(self):
         """Open the goals window."""
-        self.root.destroy()
+        self.close_window()
         GoalsWindow(self.app)
 
     def open_account(self):
         """Open the account window."""
-        self.root.destroy()
+        self.close_window()
         AccountWindow(self.app)
 
     def update_graph(self):
@@ -130,5 +130,5 @@ class DashboardWindow(MainWindow):
     def sign_out(self):
         """Sign out and return to login window."""
         self.app.session_manager.logout()
-        self.root.destroy()
+        self.close_window()
         LoginWindow(self.app)

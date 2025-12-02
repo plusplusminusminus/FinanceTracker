@@ -21,10 +21,15 @@ class MainWindow:
 
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
-    def on_close(self):
-        """Close the app and destroy the window when user close the window."""
+    def on_close(self, close_app=True):
+        """Close the app and destroy the window when user close the entire window."""
         try:
-            self.app.close()
+            if close_app:
+                self.app.close()
         finally:
             self.root.destroy()
+    
+    def close_window(self):
+        """Close the window without closing the app whene user navigate through different windows."""
+        self.on_close(close_app=False)
 

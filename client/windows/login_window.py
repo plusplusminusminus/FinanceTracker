@@ -40,7 +40,7 @@ class LoginWindow(MainWindow):
 
         is_logged_in = self.app.login(email, password)
         if is_logged_in:
-            self.root.destroy()
+            self.close_window()
             DashboardWindow(self.app)
         else:
             messagebox.showerror("Error", "Invalid login credentials")
@@ -49,6 +49,6 @@ class LoginWindow(MainWindow):
         """Open the sign up window for the user to sign up for an account."""
         from .signup_window import SignUpWindow
         
-        self.root.destroy()
+        self.close_window()
         SignUpWindow(self.app)
 

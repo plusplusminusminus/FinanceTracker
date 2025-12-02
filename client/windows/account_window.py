@@ -34,7 +34,7 @@ class AccountWindow(MainWindow):
         """Return to the dashboard window."""
         from .dashboard_window import DashboardWindow
         
-        self.root.destroy()
+        self.close_window()
         DashboardWindow(self.app)
 
     def sign_out(self):
@@ -42,6 +42,6 @@ class AccountWindow(MainWindow):
         from .login_window import LoginWindow
         
         self.app.session_manager.logout()
-        self.root.destroy()
+        self.close_window()
         LoginWindow(self.app)
 
