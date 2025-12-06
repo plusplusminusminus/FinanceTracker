@@ -2,6 +2,10 @@
 
 A personal finance tracking application built with Python and Tkinter.
 
+## Python Version
+
+This project was developed and tested using **Python 3.12.7**.
+
 ## Installation
 
 Install the required dependencies to run FinanceTracker:
